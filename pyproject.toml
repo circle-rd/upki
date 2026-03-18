@@ -42,9 +42,6 @@ ignore = []
 package-mode = true
 packages = [{include = "upki_ca"}]
 
-[tool.poetry.exclude]
-packages = ["tests"]
-
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
