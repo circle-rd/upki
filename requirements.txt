@@ -1,8 +1,0 @@
-cryptography>=41.0.0
-PyYAML>=6.0
-pyzmq>=25.0
-pymongo>=4.0
-tinydb>=4.0
-validators>=0.20.0
-cffi>=1.15.0
-decorator>=4.4.1
