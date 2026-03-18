@@ -1,8 +1,8 @@
 # uPKI CA Server
 
-[![Python Version](https://img.shields.io/pypi/pyversions/upkica)](https://pypi.org/project/upkica/)
-[![License](https://img.shields.io/pypi/l/upkica)](LICENSE)
-[![Docker Image](https://img.shields.io/docker/v/upkica/ca-server?label=docker)](https://hub.docker.com/r/upkica/ca-server)
+[![Python Version](https://img.shields.io/pypi/pyversions/upki-ca)](https://pypi.org/project/upki-ca/)
+[![License](https://img.shields.io/pypi/l/upki-ca)](LICENSE)
+[![Docker Image](https://img.shields.io/docker/v/upki-ca/ca-server?label=docker)](https://hub.docker.com/r/upki-ca/ca-server)
 
 A production-ready Public Key Infrastructure (PKI) and Certificate Authority system with native ZeroMQ protocol support for secure, high-performance certificate operations.
 
@@ -41,7 +41,7 @@ Built on ZeroMQ (ZMQ) for reliable, asynchronous communication, uPKI offers two 
 ### From PyPI
 
 ```bash
-pip install upkica
+pip install upki-ca
 ```
 
 ### From Source
@@ -65,7 +65,7 @@ pip install -e ".[dev]"
 pytest
 
 # Run with coverage report
-pytest --cov=upkica --cov-report=html
+pytest --cov=upki_ca --cov-report=html
 ```
 
 ## Quick Start
@@ -168,7 +168,7 @@ docker run -d \
   -p 5000:5000 \
   -p 5001:5001 \
   -v upki_data:/data \
-  upkica/ca-server:latest
+  upki-ca/ca-server:latest
 ```
 
 #### Using Docker Compose
@@ -178,7 +178,7 @@ version: "3.8"
 
 services:
   upki-ca:
-    image: upkica/ca-server:latest
+    image: upki-ca/ca-server:latest
     ports:
       - "5000:5000"
       - "5001:5001"
@@ -190,14 +190,14 @@ services:
 #### Build from Source
 
 ```bash
-docker build -t upkica/ca-server:latest .
+docker build -t upki-ca/ca-server:latest .
 ```
 
 ### Direct Deployment
 
 ```bash
 # Install and run as a service
-pip install upkica
+pip install upki-ca
 python ca_server.py init
 python ca_server.py listen
 ```
@@ -220,7 +220,7 @@ upki/
 │   └── SPECIFICATIONS_CA.md # CA specifications
 ├── 📁 tests/                # Test suite
 │   └── test_*.py           # Unit and functional tests
-├── 📁 upkica/               # Main package
+├── 📁 upki_ca/               # Main package
 │   ├── 📁 ca/              # Certificate Authority core
 │   │   ├── authority.py    # CA implementation
 │   │   ├── certRequest.py  # CSR handling

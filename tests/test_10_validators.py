@@ -7,13 +7,13 @@ License: MIT
 
 import pytest
 
-from upkica.core.validators import (
+from upki_ca.core.validators import (
     FQDNValidator,
     SANValidator,
     DNValidator,
     RevokeReasonValidator,
 )
-from upkica.core.upkiError import ValidationError
+from upki_ca.core.upkiError import ValidationError
 
 
 class TestFQDNValidator:

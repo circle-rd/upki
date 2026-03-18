@@ -15,7 +15,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from upkica.core.common import Common
+from upki_ca.core.common import Common
 
 
 class UpkiLoggerAdapter(logging.Logger):

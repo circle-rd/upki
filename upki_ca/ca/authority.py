@@ -19,22 +19,22 @@ from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.backends import default_backend
 
-from upkica.ca.certRequest import CertRequest
-from upkica.ca.privateKey import PrivateKey
-from upkica.ca.publicCert import PublicCert
-from upkica.core.common import Common
-from upkica.core.options import (
+from upki_ca.ca.certRequest import CertRequest
+from upki_ca.ca.privateKey import PrivateKey
+from upki_ca.ca.publicCert import PublicCert
+from upki_ca.core.common import Common
+from upki_ca.core.options import (
     BUILTIN_PROFILES,
     DEFAULT_DURATION,
 )
-from upkica.core.upkiError import (
+from upki_ca.core.upkiError import (
     AuthorityError,
     CertificateError,
     ProfileError,
 )
-from upkica.core.upkiLogger import UpkiLogger, UpkiLoggerAdapter
-from upkica.storage.abstractStorage import AbstractStorage
-from upkica.utils.profiles import Profiles
+from upki_ca.core.upkiLogger import UpkiLogger, UpkiLoggerAdapter
+from upki_ca.storage.abstractStorage import AbstractStorage
+from upki_ca.utils.profiles import Profiles
 
 
 class Authority(Common):
@@ -129,7 +129,7 @@ class Authority(Common):
             if storage is not None:
                 self._storage = storage
             else:
-                from upkica.storage.fileStorage import FileStorage
+                from upki_ca.storage.fileStorage import FileStorage
 
                 self._storage = FileStorage()
 

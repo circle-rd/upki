@@ -40,7 +40,7 @@
 ### 2.1 Project Structure
 
 ```
-upkica/
+upki_ca/
 ├── ca/
 │   ├── authority.py      # Main CA class
 │   ├── certRequest.py    # CSR handler
@@ -104,7 +104,7 @@ classDiagram
 
 ### 3.1 Authority Class
 
-**File**: [`upkica/ca/authority.py`](upkica/ca/authority.py:25)
+**File**: [`upki_ca/ca/authority.py`](upki_ca/ca/authority.py:25)
 
 Main CA class handling all PKI operations.
 
@@ -126,7 +126,7 @@ def remove_profile(name: str) -> bool
 
 ### 3.2 CertRequest Class
 
-**File**: [`upkica/ca/certRequest.py`](upkica/ca/certRequest.py:24)
+**File**: [`upki_ca/ca/certRequest.py`](upki_ca/ca/certRequest.py:24)
 
 Handles Certificate Signing Request operations.
 
@@ -141,7 +141,7 @@ def parse(csr) -> dict  # Extract subject, extensions
 
 ### 3.3 PrivateKey Class
 
-**File**: [`upkica/ca/privateKey.py`](upkica/ca/privateKey.py:21)
+**File**: [`upki_ca/ca/privateKey.py`](upki_ca/ca/privateKey.py:21)
 
 Handles private key generation and management.
 
@@ -160,7 +160,7 @@ def export(key, encoding: str = "pem", password: bytes | None = None) -> bytes
 
 ### 3.4 PublicCert Class
 
-**File**: [`upkica/ca/publicCert.py`](upkica/ca/publicCert.py:26)
+**File**: [`upki_ca/ca/publicCert.py`](upki_ca/ca/publicCert.py:26)
 
 Handles X.509 certificate operations.
 
@@ -183,7 +183,7 @@ def revoke(cert, reason: str) -> bool
 
 ### 4.1 Abstract Storage Interface
 
-**File**: [`upkica/storage/abstractStorage.py`](upkica/storage/abstractStorage.py:18)
+**File**: [`upki_ca/storage/abstractStorage.py`](upki_ca/storage/abstractStorage.py:18)
 
 Abstract base class defining the storage interface.
 
@@ -211,7 +211,7 @@ def get_node(dn: str) -> dict
 
 ### 4.2 FileStorage Implementation
 
-**File**: [`upkica/storage/fileStorage.py`](upkica/storage/fileStorage.py:23)
+**File**: [`upki_ca/storage/fileStorage.py`](upki_ca/storage/fileStorage.py:23)
 
 File-based storage using TinyDB and filesystem.
 
@@ -243,7 +243,7 @@ File-based storage using TinyDB and filesystem.
 
 ### 4.3 MongoStorage Implementation
 
-**File**: [`upkica/storage/mongoStorage.py`](upkica/storage/mongoStorage.py:21)
+**File**: [`upki_ca/storage/mongoStorage.py`](upki_ca/storage/mongoStorage.py:21)
 
 **Status**: Stub implementation (not fully implemented)
 
@@ -333,7 +333,7 @@ The CA server communicates with RA servers via ZeroMQ.
 
 ### 6.1 Profile Structure
 
-**File**: [`upkica/utils/profiles.py`](upkica/utils/profiles.py:15)
+**File**: [`upki_ca/utils/profiles.py`](upki_ca/utils/profiles.py:15)
 
 Profiles define certificate parameters and constraints.
 
@@ -377,7 +377,7 @@ certType: "server" # user, server, email, sslCA
 
 ### 6.3 Profile Validation
 
-Profiles are validated against allowed options defined in [`options.py`](upkica/core/options.py:13):
+Profiles are validated against allowed options defined in [`options.py`](upki_ca/core/options.py:13):
 
 ```python
 KeyLen: [1024, 2048, 4096]
@@ -396,7 +396,7 @@ Fields: ["C", "ST", "L", "O", "OU", "CN", "emailAddress"]
 
 ### 7.1 Input Validation
 
-**File**: [`upkica/core/validators.py`](upkica/core/validators.py:34)
+**File**: [`upki_ca/core/validators.py`](upki_ca/core/validators.py:34)
 
 Strict validation following zero-trust principles:
 
@@ -439,7 +439,7 @@ Strict validation following zero-trust principles:
 
 ### 8.1 Config File
 
-**File**: [`upkica/utils/config.py`](upkica/utils/config.py:16)
+**File**: [`upki_ca/utils/config.py`](upki_ca/utils/config.py:16)
 
 Configuration file: `~/.upki/ca/ca.config.yml`
 
@@ -485,7 +485,7 @@ python ca_server.py listen
 
 ### 9.1 ZMQ Listener Methods
 
-**File**: [`upkica/connectors/zmqListener.py`](upkica/connectors/zmqListener.py:29)
+**File**: [`upki_ca/connectors/zmqListener.py`](upki_ca/connectors/zmqListener.py:29)
 
 #### Admin Management
 
@@ -533,7 +533,7 @@ def _upki_get_options(params: dict) -> dict
 
 ### 9.2 ZMQ Register Methods
 
-**File**: [`upkica/connectors/zmqRegister.py`](upkica/connectors/zmqRegister.py:27)
+**File**: [`upki_ca/connectors/zmqRegister.py`](upki_ca/connectors/zmqRegister.py:27)
 
 ```python
 def _upki_list_profiles(params: dict) -> dict

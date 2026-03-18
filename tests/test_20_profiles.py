@@ -7,8 +7,8 @@ License: MIT
 
 import pytest
 
-from upkica.utils.profiles import Profiles
-from upkica.core.upkiError import ProfileError
+from upki_ca.utils.profiles import Profiles
+from upki_ca.core.upkiError import ProfileError
 
 
 class TestProfiles:

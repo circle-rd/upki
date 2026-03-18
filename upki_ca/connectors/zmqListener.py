@@ -13,12 +13,12 @@ from __future__ import annotations
 import json
 from typing import Any, Optional
 
-from upkica.ca.authority import Authority
-from upkica.connectors.listener import Listener
-from upkica.core.upkiError import AuthorityError, CommunicationError
-from upkica.core.upkiLogger import UpkiLogger
-from upkica.storage.abstractStorage import AbstractStorage
-from upkica.utils.profiles import Profiles
+from upki_ca.ca.authority import Authority
+from upki_ca.connectors.listener import Listener
+from upki_ca.core.upkiError import AuthorityError, CommunicationError
+from upki_ca.core.upkiLogger import UpkiLogger
+from upki_ca.storage.abstractStorage import AbstractStorage
+from upki_ca.utils.profiles import Profiles
 
 
 class ZMQListener(Listener):
@@ -266,7 +266,7 @@ class ZMQListener(Listener):
 
         # Optionally include private key
         if local and self._authority.ca_key:
-            from upkica.ca.privateKey import PrivateKey
+            from upki_ca.ca.privateKey import PrivateKey
 
             # Note: For local generation, we'd need to generate a key first
             # This is a simplified implementation

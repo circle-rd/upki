@@ -19,9 +19,9 @@ from typing import Any, Optional
 
 import zmq
 
-from upkica.core.common import Common
-from upkica.core.upkiError import CommunicationError
-from upkica.core.upkiLogger import UpkiLogger
+from upki_ca.core.common import Common
+from upki_ca.core.upkiError import CommunicationError
+from upki_ca.core.upkiLogger import UpkiLogger
 
 
 class Listener(Common, ABC):

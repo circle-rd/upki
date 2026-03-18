@@ -82,13 +82,13 @@ We use the following tools to maintain code quality:
 Run linting:
 
 ```bash
-ruff check upkica/
+ruff check upki_ca/
 ```
 
 Run formatting:
 
 ```bash
-ruff format upkica/
+ruff format upki_ca/
 ```
 
 ### Naming Conventions
@@ -127,7 +127,7 @@ def generate_certificate(csr: str, profile: str) -> Certificate:
 pytest
 
 # Run with coverage
-pytest --cov=upkica --cov-report=html
+pytest --cov=upki_ca --cov-report=html
 
 # Run specific test file
 pytest tests/test_100_pki_functional.py

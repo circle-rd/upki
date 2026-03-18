@@ -1,5 +1,5 @@
 [project]
-name = "upki"
+name = "upki-ca"
 version = "0.1.0"
 description = "uPKI CA instance"
 authors = [
@@ -37,6 +37,13 @@ target-version = "py311"
 select = ["E", "F", "W", "I", "N", "UP", "B", "C4", "SIM"]
 ignore = []
 
+
+[tool.poetry]
+package-mode = true
+packages = [{include = "upki_ca"}]
+
+[tool.poetry.exclude]
+packages = ["tests"]
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

@@ -19,9 +19,9 @@ from typing import Any, Optional
 import yaml
 from tinydb import TinyDB, Query
 
-from upkica.core.common import Common
-from upkica.core.upkiError import StorageError
-from upkica.storage.abstractStorage import AbstractStorage
+from upki_ca.core.common import Common
+from upki_ca.core.upkiError import StorageError
+from upki_ca.storage.abstractStorage import AbstractStorage
 
 
 class FileStorage(AbstractStorage, Common):

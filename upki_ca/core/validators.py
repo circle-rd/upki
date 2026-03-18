@@ -15,8 +15,8 @@ from __future__ import annotations
 import re
 from typing import Any
 
-from upkica.core.options import KeyLen, SanTypes, RevokeReasons
-from upkica.core.upkiError import ValidationError
+from upki_ca.core.options import KeyLen, SanTypes, RevokeReasons
+from upki_ca.core.upkiError import ValidationError
 
 
 class FQDNValidator:

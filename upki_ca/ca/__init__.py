@@ -8,10 +8,10 @@ This package contains the main CA classes:
 - PublicCert: X.509 certificate operations
 """
 
-from upkica.ca.authority import Authority
-from upkica.ca.certRequest import CertRequest
-from upkica.ca.privateKey import PrivateKey
-from upkica.ca.publicCert import PublicCert
+from upki_ca.ca.authority import Authority
+from upki_ca.ca.certRequest import CertRequest
+from upki_ca.ca.privateKey import PrivateKey
+from upki_ca.ca.publicCert import PublicCert
 
 __all__ = [
     "Authority",

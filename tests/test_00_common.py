@@ -7,7 +7,7 @@ License: MIT
 
 import pytest
 
-from upkica.core.common import Common
+from upki_ca.core.common import Common
 
 
 class TestCommon:

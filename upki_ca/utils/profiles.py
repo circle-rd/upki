@@ -12,8 +12,8 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
-from upkica.core.common import Common
-from upkica.core.options import (
+from upki_ca.core.common import Common
+from upki_ca.core.options import (
     BUILTIN_PROFILES,
     DEFAULT_DIGEST,
     DEFAULT_DURATION,
@@ -21,9 +21,9 @@ from upkica.core.options import (
     DEFAULT_KEY_TYPE,
     PROFILE_DURATIONS,
 )
-from upkica.core.upkiError import ProfileError
-from upkica.core.validators import DNValidator, FQDNValidator
-from upkica.storage.abstractStorage import AbstractStorage
+from upki_ca.core.upkiError import ProfileError
+from upki_ca.core.validators import DNValidator, FQDNValidator
+from upki_ca.storage.abstractStorage import AbstractStorage
 
 
 class Profiles(Common):

@@ -20,13 +20,13 @@ import logging
 import signal
 import sys
 
-from upkica.ca.authority import Authority
-from upkica.connectors.zmqListener import ZMQListener
-from upkica.connectors.zmqRegister import ZMQRegister
-from upkica.core.common import Common
-from upkica.core.upkiLogger import UpkiLogger
-from upkica.storage.fileStorage import FileStorage
-from upkica.utils.config import Config
+from upki_ca.ca.authority import Authority
+from upki_ca.connectors.zmqListener import ZMQListener
+from upki_ca.connectors.zmqRegister import ZMQRegister
+from upki_ca.core.common import Common
+from upki_ca.core.upkiLogger import UpkiLogger
+from upki_ca.storage.fileStorage import FileStorage
+from upki_ca.utils.config import Config
 
 
 class CAServer(Common):

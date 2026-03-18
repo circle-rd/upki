@@ -77,23 +77,23 @@ The following tasks are available via the main ZMQ listener on port 5000:
 
 | Task                                                    | Required Params | Optional Params                                     | Response                    |
 | ------------------------------------------------------- | --------------- | --------------------------------------------------- | --------------------------- |
-| [`get_ca`](upkica/connectors/zmqListener.py:181)        | none            | none                                                | PEM cert string             |
-| [`get_crl`](upkica/connectors/zmqListener.py:188)       | none            | none                                                | Base64 CRL                  |
-| [`generate_crl`](upkica/connectors/zmqListener.py:201)  | none            | none                                                | Base64 CRL                  |
-| [`register`](upkica/connectors/zmqListener.py:214)      | `seed`, `cn`    | `profile` (default: "server"), `sans` (default: []) | `{dn, certificate, serial}` |
-| [`generate`](upkica/connectors/zmqListener.py:243)      | `cn`            | `profile`, `sans`, `local`                          | `{dn, certificate, serial}` |
-| [`sign`](upkica/connectors/zmqListener.py:278)          | `csr`           | `profile` (default: "server")                       | `{certificate, serial}`     |
-| [`renew`](upkica/connectors/zmqListener.py:296)         | `dn`            | `duration`                                          | `{certificate, serial}`     |
-| [`revoke`](upkica/connectors/zmqListener.py:314)        | `dn`            | `reason` (default: "unspecified")                   | boolean                     |
-| [`unrevoke`](upkica/connectors/zmqListener.py:327)      | `dn`            | none                                                | boolean                     |
-| [`delete`](upkica/connectors/zmqListener.py:341)        | `dn`            | none                                                | boolean                     |
-| [`view`](upkica/connectors/zmqListener.py:355)          | `dn`            | none                                                | certificate details dict    |
-| [`ocsp_check`](upkica/connectors/zmqListener.py:369)    | `cert`          | none                                                | OCSP status dict            |
-| [`list_profiles`](upkica/connectors/zmqListener.py:163) | none            | none                                                | list of profile names       |
-| [`get_profile`](upkica/connectors/zmqListener.py:169)   | `profile`       | none                                                | profile details dict        |
-| [`list_admins`](upkica/connectors/zmqListener.py:129)   | none            | none                                                | list of admin DNs           |
-| [`add_admin`](upkica/connectors/zmqListener.py:133)     | `dn`            | none                                                | boolean                     |
-| [`remove_admin`](upkica/connectors/zmqListener.py:147)  | `dn`            | none                                                | boolean                     |
+| [`get_ca`](upki_ca/connectors/zmqListener.py:181)        | none            | none                                                | PEM cert string             |
+| [`get_crl`](upki_ca/connectors/zmqListener.py:188)       | none            | none                                                | Base64 CRL                  |
+| [`generate_crl`](upki_ca/connectors/zmqListener.py:201)  | none            | none                                                | Base64 CRL                  |
+| [`register`](upki_ca/connectors/zmqListener.py:214)      | `seed`, `cn`    | `profile` (default: "server"), `sans` (default: []) | `{dn, certificate, serial}` |
+| [`generate`](upki_ca/connectors/zmqListener.py:243)      | `cn`            | `profile`, `sans`, `local`                          | `{dn, certificate, serial}` |
+| [`sign`](upki_ca/connectors/zmqListener.py:278)          | `csr`           | `profile` (default: "server")                       | `{certificate, serial}`     |
+| [`renew`](upki_ca/connectors/zmqListener.py:296)         | `dn`            | `duration`                                          | `{certificate, serial}`     |
+| [`revoke`](upki_ca/connectors/zmqListener.py:314)        | `dn`            | `reason` (default: "unspecified")                   | boolean                     |
+| [`unrevoke`](upki_ca/connectors/zmqListener.py:327)      | `dn`            | none                                                | boolean                     |
+| [`delete`](upki_ca/connectors/zmqListener.py:341)        | `dn`            | none                                                | boolean                     |
+| [`view`](upki_ca/connectors/zmqListener.py:355)          | `dn`            | none                                                | certificate details dict    |
+| [`ocsp_check`](upki_ca/connectors/zmqListener.py:369)    | `cert`          | none                                                | OCSP status dict            |
+| [`list_profiles`](upki_ca/connectors/zmqListener.py:163) | none            | none                                                | list of profile names       |
+| [`get_profile`](upki_ca/connectors/zmqListener.py:169)   | `profile`       | none                                                | profile details dict        |
+| [`list_admins`](upki_ca/connectors/zmqListener.py:129)   | none            | none                                                | list of admin DNs           |
+| [`add_admin`](upki_ca/connectors/zmqListener.py:133)     | `dn`            | none                                                | boolean                     |
+| [`remove_admin`](upki_ca/connectors/zmqListener.py:147)  | `dn`            | none                                                | boolean                     |
 
 ---
 
@@ -671,8 +671,8 @@ The following tasks are available via the registration ZMQ listener on port 5001
 
 | Task                                              | Required Params | Optional Params           | Response                |
 | ------------------------------------------------- | --------------- | ------------------------- | ----------------------- |
-| [`register`](upkica/connectors/zmqRegister.py:63) | `seed`, `cn`    | `profile` (default: "ra") | `{status, cn, profile}` |
-| [`status`](upkica/connectors/zmqRegister.py:95)   | none            | `cn`                      | `{status, node?}`       |
+| [`register`](upki_ca/connectors/zmqRegister.py:63) | `seed`, `cn`    | `profile` (default: "ra") | `{status, cn, profile}` |
+| [`status`](upki_ca/connectors/zmqRegister.py:95)   | none            | `cn`                      | `{status, node?}`       |
 
 ---
 
@@ -877,7 +877,7 @@ This document provides complete documentation for implementing the RA side of th
 
 For implementation support, refer to the source code:
 
-- [`upkica/connectors/zmqListener.py`](upkica/connectors/zmqListener.py) - Main CA operations
-- [`upkica/connectors/zmqRegister.py`](upkica/connectors/zmqRegister.py) - RA registration
-- [`upkica/connectors/listener.py`](upkica/connectors/listener.py) - Base listener class
-- [`upkica/ca/authority.py`](upkica/ca/authority.py) - Authority implementation
+- [`upki_ca/connectors/zmqListener.py`](upki_ca/connectors/zmqListener.py) - Main CA operations
+- [`upki_ca/connectors/zmqRegister.py`](upki_ca/connectors/zmqRegister.py) - RA registration
+- [`upki_ca/connectors/listener.py`](upki_ca/connectors/listener.py) - Base listener class
+- [`upki_ca/ca/authority.py`](upki_ca/ca/authority.py) - Authority implementation

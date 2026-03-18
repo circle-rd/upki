@@ -28,10 +28,10 @@ from cryptography.hazmat.primitives.serialization.ssh import (
     load_ssh_private_key,
 )
 
-from upkica.core.common import Common
-from upkica.core.options import KeyTypes, KeyLen, DEFAULT_KEY_TYPE, DEFAULT_KEY_LENGTH
-from upkica.core.upkiError import KeyError, ValidationError
-from upkica.core.validators import CSRValidator
+from upki_ca.core.common import Common
+from upki_ca.core.options import KeyTypes, KeyLen, DEFAULT_KEY_TYPE, DEFAULT_KEY_LENGTH
+from upki_ca.core.upkiError import KeyError, ValidationError
+from upki_ca.core.validators import CSRValidator
 
 
 class PrivateKey(Common):

@@ -15,9 +15,9 @@ from typing import Any, Optional
 
 import yaml
 
-from upkica.core.common import Common
-from upkica.core.options import DEFAULT_KEY_LENGTH, DEFAULT_DIGEST, ClientModes
-from upkica.core.upkiError import ConfigurationError
+from upki_ca.core.common import Common
+from upki_ca.core.options import DEFAULT_KEY_LENGTH, DEFAULT_DIGEST, ClientModes
+from upki_ca.core.upkiError import ConfigurationError
 
 
 class Config(Common):

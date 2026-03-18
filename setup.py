@@ -11,7 +11,7 @@ with open("README.md", "r", encoding="utf-8") as f:
     long_description = f.read()
 
 setup(
-    name="upkica",
+    name="upki-ca",
     version="0.1.0",
     author="uPKI Team",
     author_email="info@upki.io",
@@ -45,7 +45,7 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "upkica-server=ca_server:main",
+            "upki-ca-server=ca_server:main",
         ],
     },
 )

@@ -572,8 +572,8 @@ class TestCertificateExtensions:
         )
 
         # Import here to get the initialized Authority
-        from upkica.ca.authority import Authority
-        from upkica.storage.fileStorage import FileStorage
+        from upki_ca.ca.authority import Authority
+        from upki_ca.storage.fileStorage import FileStorage
 
         # Initialize Authority with our test PKI path
         self._authority = Authority.get_instance()

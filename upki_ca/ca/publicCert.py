@@ -20,12 +20,12 @@ from cryptography.x509.oid import NameOID, ExtensionOID, ExtendedKeyUsageOID
 
 import ipaddress
 
-from upkica.ca.certRequest import CertRequest
-from upkica.ca.privateKey import PrivateKey
-from upkica.core.common import Common
-from upkica.core.options import DEFAULT_DIGEST, DEFAULT_DURATION
-from upkica.core.upkiError import CertificateError
-from upkica.core.validators import DNValidator, RevokeReasonValidator, SANValidator
+from upki_ca.ca.certRequest import CertRequest
+from upki_ca.ca.privateKey import PrivateKey
+from upki_ca.core.common import Common
+from upki_ca.core.options import DEFAULT_DIGEST, DEFAULT_DURATION
+from upki_ca.core.upkiError import CertificateError
+from upki_ca.core.validators import DNValidator, RevokeReasonValidator, SANValidator
 
 
 class PublicCert(Common):

@@ -19,10 +19,10 @@ from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.backends import default_backend
 from cryptography.x509.oid import NameOID, ExtensionOID, ExtendedKeyUsageOID
 
-from upkica.ca.privateKey import PrivateKey
-from upkica.core.common import Common
-from upkica.core.upkiError import CertificateError
-from upkica.core.validators import DNValidator, SANValidator
+from upki_ca.ca.privateKey import PrivateKey
+from upki_ca.core.common import Common
+from upki_ca.core.upkiError import CertificateError
+from upki_ca.core.validators import DNValidator, SANValidator
 
 
 class CertRequest(Common):

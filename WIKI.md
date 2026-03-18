@@ -118,7 +118,7 @@ Two ZMQ listeners handle different operations:
 ### From PyPI
 
 ```bash
-pip install upkica
+pip install upki-ca
 ```
 
 ### From Source
@@ -133,7 +133,7 @@ pip install -e .
 
 ```bash
 # Pull the image
-docker pull upkica/ca-server:latest
+docker pull upki-ca/ca-server:latest
 
 # Run the container
 docker run -d \
@@ -141,7 +141,7 @@ docker run -d \
   -p 5000:5000 \
   -p 5001:5001 \
   -v upki_data:/data \
-  upkica/ca-server:latest
+  upki-ca/ca-server:latest
 ```
 
 ### Development Setup
@@ -432,7 +432,7 @@ python ca_server.py listen [--config CONFIG] [--host HOST]
 #### CertificateAuthority
 
 ```python
-from upkica.ca.authority import CertificateAuthority
+from upki_ca.ca.authority import CertificateAuthority
 
 ca = CertificateAuthority()
 ca.initialize()
@@ -444,7 +444,7 @@ ca.generate_crl()
 #### Certificate Profiles
 
 ```python
-from upkica.utils.profiles import ProfileManager
+from upki_ca.utils.profiles import ProfileManager
 
 profiles = ProfileManager()
 profiles.load()
