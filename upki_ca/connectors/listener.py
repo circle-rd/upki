@@ -11,17 +11,15 @@ License: MIT
 from __future__ import annotations
 
 import json
-import logging
-import socket
 import threading
 from abc import ABC, abstractmethod
-from typing import Any, Optional
+from typing import Any
 
 import zmq
 
 from upki_ca.core.common import Common
-from upki_ca.core.upkiError import CommunicationError
-from upki_ca.core.upkiLogger import UpkiLogger
+from upki_ca.core.upki_error import CommunicationError
+from upki_ca.core.upki_logger import UpkiLogger
 
 
 class Listener(Common, ABC):
@@ -72,12 +70,14 @@ class Listener(Common, ABC):
         try:
             self._zmq_context = zmq.Context()
             self._socket = self._zmq_context.socket(zmq.REP)
+            if self._socket is None:
+                raise CommunicationError("Failed to create ZMQ socket")
             self._socket.setsockopt(zmq.RCVTIMEO, self._timeout)
             self._socket.setsockopt(zmq.SNDTIMEO, self._timeout)
 
             return True
         except Exception as e:
-            raise CommunicationError(f"Failed to initialize listener: {e}")
+            raise CommunicationError(f"Failed to initialize listener: {e}") from e
 
     def bind(self) -> bool:
         """
@@ -94,7 +94,7 @@ class Listener(Common, ABC):
             self._logger.info(f"Listener bound to {self.address}")
             return True
         except Exception as e:
-            raise CommunicationError(f"Failed to bind to {self.address}: {e}")
+            raise CommunicationError(f"Failed to bind to {self.address}: {e}") from e
 
     def start(self) -> bool:
         """
@@ -223,4 +223,4 @@ class Listener(Common, ABC):
 
             return json.loads(response)
         except Exception as e:
-            raise CommunicationError(f"Failed to send request: {e}")
+            raise CommunicationError(f"Failed to send request: {e}") from e

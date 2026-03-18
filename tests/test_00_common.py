@@ -5,7 +5,6 @@ Author: uPKI Team
 License: MIT
 """
 
-import pytest
 
 from upki_ca.core.common import Common
 

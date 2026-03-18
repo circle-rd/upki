@@ -10,7 +10,7 @@ License: MIT
 
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Any
 
 from upki_ca.core.common import Common
 from upki_ca.core.options import (
@@ -21,9 +21,9 @@ from upki_ca.core.options import (
     DEFAULT_KEY_TYPE,
     PROFILE_DURATIONS,
 )
-from upki_ca.core.upkiError import ProfileError
-from upki_ca.core.validators import DNValidator, FQDNValidator
-from upki_ca.storage.abstractStorage import AbstractStorage
+from upki_ca.core.upki_error import ProfileError
+from upki_ca.core.validators import DNValidator
+from upki_ca.storage.abstract_storage import AbstractStorage
 
 
 class Profiles(Common):
@@ -142,13 +142,12 @@ class Profiles(Common):
         Raises:
             ProfileError: If profile not found
         """
-        if name not in self._profiles:
+        if name not in self._profiles and self._storage:
             # Try to load from storage
-            if self._storage:
-                profile = self._storage.get_profile(name)
-                if profile:
-                    self._profiles[name] = profile
-                    return profile
+            profile = self._storage.get_profile(name)
+            if profile:
+                self._profiles[name] = profile
+                return profile
 
         if name not in self._profiles:
             raise ProfileError(f"Profile not found: {name}")
@@ -382,4 +381,4 @@ class Profiles(Common):
             data = yaml.safe_load(yaml_data)
             return self.add(name, data)
         except Exception as e:
-            raise ProfileError(f"Failed to import profile: {e}")
+            raise ProfileError(f"Failed to import profile: {e}") from e

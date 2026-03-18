@@ -10,21 +10,20 @@ License: MIT
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+import ipaddress
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from cryptography import x509
-from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.backends import default_backend
-from cryptography.x509.oid import NameOID, ExtensionOID, ExtendedKeyUsageOID
+from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.x509.oid import ExtendedKeyUsageOID, ExtensionOID, NameOID
 
-import ipaddress
-
-from upki_ca.ca.certRequest import CertRequest
-from upki_ca.ca.privateKey import PrivateKey
+from upki_ca.ca.cert_request import CertRequest
+from upki_ca.ca.private_key import PrivateKey
 from upki_ca.core.common import Common
 from upki_ca.core.options import DEFAULT_DIGEST, DEFAULT_DURATION
-from upki_ca.core.upkiError import CertificateError
+from upki_ca.core.upki_error import CertificateError
 from upki_ca.core.validators import DNValidator, RevokeReasonValidator, SANValidator
 
 
@@ -121,7 +120,7 @@ class PublicCert(Common):
         if self._cert is None:
             raise CertificateError("No certificate loaded")
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         return self.not_valid_before <= now <= self.not_valid_after
 
     @property
@@ -251,7 +250,7 @@ class PublicCert(Common):
         """
         # Get parameters
         if start is None:
-            start = datetime.now(timezone.utc)
+            start = datetime.now(UTC)
 
         if duration is None:
             duration = profile.get("duration", DEFAULT_DURATION)
@@ -267,13 +266,9 @@ class PublicCert(Common):
         subject = csr.subject
 
         # Build issuer
-        if self_signed:
-            issuer = subject
-            # For self-signed, the issuer is the subject itself
-            # (no need to store the public key separately)
-        else:
-            issuer = issuer_cert.subject
-            # Note: issuer_pkey was removed as it's not used
+        issuer = subject if self_signed else issuer_cert.subject
+        # For self-signed, the issuer is the subject itself
+        # (no need to store the public key separately)
 
         # Get subject from CSR for DN validation
         subject_dict = {}
@@ -386,7 +381,7 @@ class PublicCert(Common):
 
             return cls(cert)
         except Exception as e:
-            raise CertificateError(f"Failed to generate certificate: {e}")
+            raise CertificateError(f"Failed to generate certificate: {e}") from e
 
     @classmethod
     def load(cls, cert_pem: str) -> PublicCert:
@@ -408,7 +403,7 @@ class PublicCert(Common):
             )
             return cls(cert)
         except Exception as e:
-            raise CertificateError(f"Failed to load certificate: {e}")
+            raise CertificateError(f"Failed to load certificate: {e}") from e
 
     @classmethod
     def load_from_file(cls, filepath: str) -> PublicCert:
@@ -425,13 +420,13 @@ class PublicCert(Common):
             CertificateError: If certificate loading fails
         """
         try:
-            with open(filepath, "r") as f:
+            with open(filepath) as f:
                 cert_pem = f.read()
             return cls.load(cert_pem)
         except FileNotFoundError:
-            raise CertificateError(f"Certificate file not found: {filepath}")
+            raise CertificateError(f"Certificate file not found: {filepath}") from None
         except Exception as e:
-            raise CertificateError(f"Failed to load certificate from file: {e}")
+            raise CertificateError(f"Failed to load certificate from file: {e}") from e
 
     def export(
         self, cert: x509.Certificate | None = None, encoding: str = "pem"
@@ -463,7 +458,7 @@ class PublicCert(Common):
             else:
                 raise CertificateError(f"Unsupported encoding: {encoding}")
         except Exception as e:
-            raise CertificateError(f"Failed to export certificate: {e}")
+            raise CertificateError(f"Failed to export certificate: {e}") from e
 
     def export_to_file(self, filepath: str, encoding: str = "pem") -> bool:
         """
@@ -485,7 +480,7 @@ class PublicCert(Common):
                 f.write(cert_pem)
             return True
         except Exception as e:
-            raise CertificateError(f"Failed to export certificate to file: {e}")
+            raise CertificateError(f"Failed to export certificate to file: {e}") from e
 
     def verify(
         self, issuer_cert: PublicCert | None = None, issuer_public_key: Any = None
@@ -522,7 +517,7 @@ class PublicCert(Common):
             )
             return True
         except Exception as e:
-            raise CertificateError(f"Certificate verification failed: {e}")
+            raise CertificateError(f"Certificate verification failed: {e}") from e
 
     def revoke(self, reason: str, date: datetime | None = None) -> bool:
         """
@@ -542,7 +537,7 @@ class PublicCert(Common):
 
         self._revoked = True
         self._revoke_reason = reason
-        self._revoke_date = date if date is not None else datetime.now(timezone.utc)
+        self._revoke_date = date if date is not None else datetime.now(UTC)
 
         return True
 

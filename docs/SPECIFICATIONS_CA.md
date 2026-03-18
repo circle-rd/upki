@@ -43,23 +43,23 @@
 upki_ca/
 ├── ca/
 │   ├── authority.py      # Main CA class
-│   ├── certRequest.py    # CSR handler
-│   ├── privateKey.py     # Private key handler
-│   └── publicCert.py     # Certificate handler
+│   ├── cert_request.py    # CSR handler
+│   ├── private_key.py     # Private key handler
+│   └── public_cert.py     # Certificate handler
 ├── connectors/
 │   ├── listener.py       # Base ZMQ listener
-│   ├── zmqListener.py    # Full CA operations
-│   └── zmqRegister.py    # RA registration
+│   ├── zmq_listener.py    # Full CA operations
+│   └── zmq_register.py    # RA registration
 ├── core/
 │   ├── common.py         # Base utilities
 │   ├── options.py        # Allowed values
-│   ├── upkiError.py     # Exceptions
-│   ├── upkiLogger.py    # Logging
+│   ├── upki_error.py     # Exceptions
+│   ├── upki_logger.py    # Logging
 │   └── validators.py     # Input validation
 ├── storage/
-│   ├── abstractStorage.py # Storage interface
-│   ├── fileStorage.py    # File-based backend
-│   └── mongoStorage.py   # MongoDB backend (stub)
+│   ├── abstract_storage.py # Storage interface
+│   ├── file_storage.py    # File-based backend
+│   └── mongo_storage.py   # MongoDB backend (stub)
 ├── utils/
 │   ├── admins.py         # Admin management
 │   ├── config.py         # Configuration
@@ -126,7 +126,7 @@ def remove_profile(name: str) -> bool
 
 ### 3.2 CertRequest Class
 
-**File**: [`upki_ca/ca/certRequest.py`](upki_ca/ca/certRequest.py:24)
+**File**: [`upki_ca/ca/cert_request.py`](upki_ca/ca/cert_request.py:24)
 
 Handles Certificate Signing Request operations.
 
@@ -141,7 +141,7 @@ def parse(csr) -> dict  # Extract subject, extensions
 
 ### 3.3 PrivateKey Class
 
-**File**: [`upki_ca/ca/privateKey.py`](upki_ca/ca/privateKey.py:21)
+**File**: [`upki_ca/ca/private_key.py`](upki_ca/ca/private_key.py:21)
 
 Handles private key generation and management.
 
@@ -160,7 +160,7 @@ def export(key, encoding: str = "pem", password: bytes | None = None) -> bytes
 
 ### 3.4 PublicCert Class
 
-**File**: [`upki_ca/ca/publicCert.py`](upki_ca/ca/publicCert.py:26)
+**File**: [`upki_ca/ca/public_cert.py`](upki_ca/ca/public_cert.py:26)
 
 Handles X.509 certificate operations.
 
@@ -183,7 +183,7 @@ def revoke(cert, reason: str) -> bool
 
 ### 4.1 Abstract Storage Interface
 
-**File**: [`upki_ca/storage/abstractStorage.py`](upki_ca/storage/abstractStorage.py:18)
+**File**: [`upki_ca/storage/abstract_storage.py`](upki_ca/storage/abstract_storage.py:18)
 
 Abstract base class defining the storage interface.
 
@@ -211,7 +211,7 @@ def get_node(dn: str) -> dict
 
 ### 4.2 FileStorage Implementation
 
-**File**: [`upki_ca/storage/fileStorage.py`](upki_ca/storage/fileStorage.py:23)
+**File**: [`upki_ca/storage/file_storage.py`](upki_ca/storage/file_storage.py:23)
 
 File-based storage using TinyDB and filesystem.
 
@@ -243,7 +243,7 @@ File-based storage using TinyDB and filesystem.
 
 ### 4.3 MongoStorage Implementation
 
-**File**: [`upki_ca/storage/mongoStorage.py`](upki_ca/storage/mongoStorage.py:21)
+**File**: [`upki_ca/storage/mongo_storage.py`](upki_ca/storage/mongo_storage.py:21)
 
 **Status**: Stub implementation (not fully implemented)
 
@@ -485,7 +485,7 @@ python ca_server.py listen
 
 ### 9.1 ZMQ Listener Methods
 
-**File**: [`upki_ca/connectors/zmqListener.py`](upki_ca/connectors/zmqListener.py:29)
+**File**: [`upki_ca/connectors/zmq_listener.py`](upki_ca/connectors/zmq_listener.py:29)
 
 #### Admin Management
 
@@ -533,7 +533,7 @@ def _upki_get_options(params: dict) -> dict
 
 ### 9.2 ZMQ Register Methods
 
-**File**: [`upki_ca/connectors/zmqRegister.py`](upki_ca/connectors/zmqRegister.py:27)
+**File**: [`upki_ca/connectors/zmq_register.py`](upki_ca/connectors/zmq_register.py:27)
 
 ```python
 def _upki_list_profiles(params: dict) -> dict

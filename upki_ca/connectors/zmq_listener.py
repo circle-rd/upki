@@ -10,14 +10,13 @@ License: MIT
 
 from __future__ import annotations
 
-import json
-from typing import Any, Optional
+from typing import Any
 
 from upki_ca.ca.authority import Authority
 from upki_ca.connectors.listener import Listener
-from upki_ca.core.upkiError import AuthorityError, CommunicationError
-from upki_ca.core.upkiLogger import UpkiLogger
-from upki_ca.storage.abstractStorage import AbstractStorage
+from upki_ca.core.upki_error import AuthorityError, CommunicationError
+from upki_ca.core.upki_logger import UpkiLogger
+from upki_ca.storage.abstract_storage import AbstractStorage
 from upki_ca.utils.profiles import Profiles
 
 
@@ -85,7 +84,7 @@ class ZMQListener(Listener):
 
             return True
         except Exception as e:
-            raise AuthorityError(f"Failed to initialize Authority: {e}")
+            raise AuthorityError(f"Failed to initialize Authority: {e}") from e
 
     def _handle_task(self, task: str, params: dict[str, Any]) -> Any:
         """
@@ -266,7 +265,7 @@ class ZMQListener(Listener):
 
         # Optionally include private key
         if local and self._authority.ca_key:
-            from upki_ca.ca.privateKey import PrivateKey
+            pass
 
             # Note: For local generation, we'd need to generate a key first
             # This is a simplified implementation

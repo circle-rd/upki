@@ -11,29 +11,28 @@ License: MIT
 from __future__ import annotations
 
 import os
-import logging
-from datetime import datetime, timedelta, timezone
-from typing import Any, Optional
+from datetime import UTC, datetime, timedelta
+from typing import Any
 
 from cryptography import x509
-from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import hashes, serialization
 
-from upki_ca.ca.certRequest import CertRequest
-from upki_ca.ca.privateKey import PrivateKey
-from upki_ca.ca.publicCert import PublicCert
+from upki_ca.ca.cert_request import CertRequest
+from upki_ca.ca.private_key import PrivateKey
+from upki_ca.ca.public_cert import PublicCert
 from upki_ca.core.common import Common
 from upki_ca.core.options import (
     BUILTIN_PROFILES,
     DEFAULT_DURATION,
 )
-from upki_ca.core.upkiError import (
+from upki_ca.core.upki_error import (
     AuthorityError,
     CertificateError,
     ProfileError,
 )
-from upki_ca.core.upkiLogger import UpkiLogger, UpkiLoggerAdapter
-from upki_ca.storage.abstractStorage import AbstractStorage
+from upki_ca.core.upki_logger import UpkiLogger, UpkiLoggerAdapter
+from upki_ca.storage.abstract_storage import AbstractStorage
 from upki_ca.utils.profiles import Profiles
 
 
@@ -49,7 +48,7 @@ class Authority(Common):
     """
 
     # Singleton instance
-    _instance: Optional[Authority] = None
+    _instance: Authority | None = None
 
     def __init__(self) -> None:
         """Initialize an Authority instance."""
@@ -129,7 +128,7 @@ class Authority(Common):
             if storage is not None:
                 self._storage = storage
             else:
-                from upki_ca.storage.fileStorage import FileStorage
+                from upki_ca.storage.file_storage import FileStorage
 
                 self._storage = FileStorage()
 
@@ -160,7 +159,7 @@ class Authority(Common):
 
         except Exception as e:
             self._logger.error("Authority: %s", e)
-            raise AuthorityError(f"Failed to initialize Authority: {e}")
+            raise AuthorityError(f"Failed to initialize Authority: {e}") from e
 
     def load(self) -> bool:
         """
@@ -193,7 +192,7 @@ class Authority(Common):
             return True
 
         except Exception as e:
-            raise AuthorityError(f"Failed to load Authority: {e}")
+            raise AuthorityError(f"Failed to load Authority: {e}") from e
 
     def _load_keychain(self, path: str) -> None:
         """
@@ -529,7 +528,7 @@ class Authority(Common):
         # Add to CRL
         revoke_entry = {
             "serial": cert.serial_number,
-            "revoke_date": datetime.now(timezone.utc).isoformat(),
+            "revoke_date": datetime.now(UTC).isoformat(),
             "reason": reason,
             "dn": dn,
         }
@@ -677,7 +676,7 @@ class Authority(Common):
             node_data["new_cert_serial"] = new_cert.serial_number
             node_data["new_cert_data"] = new_cert.export()
             node_data["renewed"] = True
-            node_data["renewal_date"] = datetime.now(timezone.utc).isoformat()
+            node_data["renewal_date"] = datetime.now(UTC).isoformat()
             self._storage.store_node(dn, node_data)
 
         # Log renewal
@@ -766,7 +765,7 @@ class Authority(Common):
         node_data = self._storage.get_node(dn)
         if node_data:
             node_data["deleted"] = True
-            node_data["delete_date"] = datetime.now(timezone.utc).isoformat()
+            node_data["delete_date"] = datetime.now(UTC).isoformat()
             self._storage.store_node(dn, node_data)
 
         # Log deletion
@@ -796,8 +795,8 @@ class Authority(Common):
         builder = (
             x509.CertificateRevocationListBuilder()
             .issuer_name(self._ca_cert.subject)
-            .last_update(datetime.now(timezone.utc))
-            .next_update(datetime.now(timezone.utc) + timedelta(days=7))
+            .last_update(datetime.now(UTC))
+            .next_update(datetime.now(UTC) + timedelta(days=7))
         )
 
         # Add revoked certificates
@@ -813,7 +812,7 @@ class Authority(Common):
         # Sign CRL
         crl = builder.sign(self._ca_key.key, hashes.SHA256(), default_backend())
 
-        self._crl_last_update = datetime.now(timezone.utc)
+        self._crl_last_update = datetime.now(UTC)
 
         # Store CRL in storage
         crl_data = crl.public_bytes(serialization.Encoding.DER)

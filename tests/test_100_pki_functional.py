@@ -20,7 +20,6 @@ import sys
 
 import pytest
 
-
 # Path to the ca_server.py script
 CA_SERVER_PATH = os.path.join(
     os.path.dirname(os.path.dirname(__file__)), "ca_server.py"
@@ -573,7 +572,7 @@ class TestCertificateExtensions:
 
         # Import here to get the initialized Authority
         from upki_ca.ca.authority import Authority
-        from upki_ca.storage.fileStorage import FileStorage
+        from upki_ca.storage.file_storage import FileStorage
 
         # Initialize Authority with our test PKI path
         self._authority = Authority.get_instance()
@@ -596,7 +595,6 @@ class TestCertificateExtensions:
 
     def _generate_test_certificates(self):
         """Generate test certificates for different profiles."""
-        import tempfile
 
         # Generate CA certificate (self-signed)
         self.ca_cert = self._generate_self_signed_cert(
@@ -782,7 +780,7 @@ subjectKeyIdentifier=hash
         with open(ext_file, "w") as f:
             f.write(ext_config)
 
-        result = subprocess.run(
+        subprocess.run(
             [
                 "openssl",
                 "x509",
@@ -832,7 +830,7 @@ subjectKeyIdentifier=hash
         in_extension = False
         ext_value = ""
 
-        for i, line in enumerate(lines):
+        for _i, line in enumerate(lines):
             if extension_name in line:
                 in_extension = True
             if in_extension:
@@ -851,7 +849,9 @@ subjectKeyIdentifier=hash
 
         # CA should have Certificate Sign (keyCertSign) and CRL Sign (cRLSign)
         # OpenSSL displays these as "Certificate Sign" and "CRL Sign"
-        assert "Certificate Sign" in extensions, "CA certificate should have Certificate Sign"
+        assert (
+            "Certificate Sign" in extensions
+        ), "CA certificate should have Certificate Sign"
         assert "CRL Sign" in extensions, "CA certificate should have CRL Sign"
 
     def test_ra_key_usage(self):
@@ -1005,7 +1005,6 @@ subjectKeyIdentifier=hash
     def test_ca_no_authority_key_identifier(self):
         """Test self-signed CA has no AKI (or keyid:always matches)."""
         # Self-signed CA may have AKI pointing to itself
-        extensions = self._get_cert_extensions(self.ca_cert)
         # This is acceptable for self-signed
 
     # ========== subjectAltName Tests ==========

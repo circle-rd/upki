@@ -10,27 +10,22 @@ License: MIT
 
 from __future__ import annotations
 
-import io
-from typing import Any, Optional
+from typing import Any
 
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.asymmetric import rsa, dsa, padding
 from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import dsa, padding, rsa
 from cryptography.hazmat.primitives.serialization import (
-    Encoding,
-    PrivateFormat,
-    NoEncryption,
     BestAvailableEncryption,
+    Encoding,
+    NoEncryption,
+    PrivateFormat,
     load_pem_private_key,
-    load_der_private_key,
-)
-from cryptography.hazmat.primitives.serialization.ssh import (
-    load_ssh_private_key,
 )
 
 from upki_ca.core.common import Common
-from upki_ca.core.options import KeyTypes, KeyLen, DEFAULT_KEY_TYPE, DEFAULT_KEY_LENGTH
-from upki_ca.core.upkiError import KeyError, ValidationError
+from upki_ca.core.options import DEFAULT_KEY_LENGTH, DEFAULT_KEY_TYPE, KeyTypes
+from upki_ca.core.upki_error import KeyError, ValidationError
 from upki_ca.core.validators import CSRValidator
 
 
@@ -139,7 +134,7 @@ class PrivateKey(Common):
             return cls(key)
 
         except Exception as e:
-            raise KeyError(f"Failed to generate private key: {e}")
+            raise KeyError(f"Failed to generate private key: {e}") from e
 
     @classmethod
     def load(cls, key_pem: str, password: bytes | None = None) -> PrivateKey:
@@ -162,7 +157,7 @@ class PrivateKey(Common):
             )
             return cls(key)
         except Exception as e:
-            raise KeyError(f"Failed to load private key: {e}")
+            raise KeyError(f"Failed to load private key: {e}") from e
 
     @classmethod
     def load_from_file(cls, filepath: str, password: bytes | None = None) -> PrivateKey:
@@ -187,10 +182,10 @@ class PrivateKey(Common):
                 key_data, password=password, backend=default_backend()
             )
             return cls(key)
-        except FileNotFoundError:
-            raise KeyError(f"Key file not found: {filepath}")
+        except FileNotFoundError as e:
+            raise KeyError(f"Key file not found: {filepath}") from e
         except Exception as e:
-            raise KeyError(f"Failed to load private key from file: {e}")
+            raise KeyError(f"Failed to load private key from file: {e}") from e
 
     def export(self, encoding: str = "pem", password: bytes | None = None) -> bytes:
         """
@@ -211,10 +206,9 @@ class PrivateKey(Common):
 
         try:
             if encoding.lower() == "pem":
-                if password:
-                    encryption = BestAvailableEncryption(password)
-                else:
-                    encryption = NoEncryption()
+                encryption = (
+                    BestAvailableEncryption(password) if password else NoEncryption()
+                )
 
                 return self._key.private_bytes(
                     encoding=Encoding.PEM,
@@ -222,10 +216,9 @@ class PrivateKey(Common):
                     encryption_algorithm=encryption,
                 )
             elif encoding.lower() == "der":
-                if password:
-                    encryption = BestAvailableEncryption(password)
-                else:
-                    encryption = NoEncryption()
+                encryption = (
+                    BestAvailableEncryption(password) if password else NoEncryption()
+                )
 
                 return self._key.private_bytes(
                     encoding=Encoding.DER,
@@ -242,7 +235,7 @@ class PrivateKey(Common):
                 raise KeyError(f"Unsupported encoding: {encoding}")
 
         except Exception as e:
-            raise KeyError(f"Failed to export private key: {e}")
+            raise KeyError(f"Failed to export private key: {e}") from e
 
     def export_to_file(
         self, filepath: str, encoding: str = "pem", password: bytes | None = None
@@ -277,7 +270,7 @@ class PrivateKey(Common):
 
             return True
         except Exception as e:
-            raise KeyError(f"Failed to export private key to file: {e}")
+            raise KeyError(f"Failed to export private key to file: {e}") from e
 
     def sign(self, data: bytes, digest: str = "sha256") -> bytes:
         """
@@ -303,7 +296,7 @@ class PrivateKey(Common):
             else:
                 raise KeyError(f"Signing not supported for key type: {self.key_type}")
         except Exception as e:
-            raise KeyError(f"Failed to sign data: {e}")
+            raise KeyError(f"Failed to sign data: {e}") from e
 
     def __repr__(self) -> str:
         """Return string representation of the key."""

@@ -13,7 +13,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
-from upki_ca.storage.abstractStorage import AbstractStorage
+from upki_ca.storage.abstract_storage import AbstractStorage
 
 
 class MongoStorage(AbstractStorage):

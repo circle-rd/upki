@@ -11,13 +11,13 @@ License: MIT
 from __future__ import annotations
 
 import os
-from typing import Any, Optional
+from typing import Any
 
 import yaml
 
 from upki_ca.core.common import Common
-from upki_ca.core.options import DEFAULT_KEY_LENGTH, DEFAULT_DIGEST, ClientModes
-from upki_ca.core.upkiError import ConfigurationError
+from upki_ca.core.options import DEFAULT_DIGEST, DEFAULT_KEY_LENGTH, ClientModes
+from upki_ca.core.upki_error import ConfigurationError
 
 
 class Config(Common):
@@ -83,11 +83,11 @@ class Config(Common):
         # Try to load from file
         if os.path.exists(self._config_path):
             try:
-                with open(self._config_path, "r") as f:
+                with open(self._config_path) as f:
                     file_config = yaml.safe_load(f) or {}
                 self._config.update(file_config)
             except Exception as e:
-                raise ConfigurationError(f"Failed to load config: {e}")
+                raise ConfigurationError(f"Failed to load config: {e}") from e
 
         return True
 
@@ -104,7 +104,7 @@ class Config(Common):
                 yaml.safe_dump(self._config, f, default_flow_style=False)
             return True
         except Exception as e:
-            raise ConfigurationError(f"Failed to save config: {e}")
+            raise ConfigurationError(f"Failed to save config: {e}") from e
 
     def get(self, key: str, default: Any = None) -> Any:
         """

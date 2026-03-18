@@ -16,16 +16,15 @@ License: MIT
 from __future__ import annotations
 
 import argparse
-import logging
 import signal
 import sys
 
 from upki_ca.ca.authority import Authority
-from upki_ca.connectors.zmqListener import ZMQListener
-from upki_ca.connectors.zmqRegister import ZMQRegister
+from upki_ca.connectors.zmq_listener import ZMQListener
+from upki_ca.connectors.zmq_register import ZMQRegister
 from upki_ca.core.common import Common
-from upki_ca.core.upkiLogger import UpkiLogger
-from upki_ca.storage.fileStorage import FileStorage
+from upki_ca.core.upki_logger import UpkiLogger
+from upki_ca.storage.file_storage import FileStorage
 from upki_ca.utils.config import Config
 
 
@@ -219,10 +218,10 @@ def main() -> int:
     subparsers = parser.add_subparsers(dest="command", help="Command to execute")
 
     # init command
-    init_parser = subparsers.add_parser("init", help="Initialize PKI")
+    subparsers.add_parser("init", help="Initialize PKI")
 
     # register command
-    register_parser = subparsers.add_parser("register", help="Register RA (clear mode)")
+    subparsers.add_parser("register", help="Register RA (clear mode)")
 
     # listen command
     listen_parser = subparsers.add_parser("listen", help="Start CA server (TLS mode)")

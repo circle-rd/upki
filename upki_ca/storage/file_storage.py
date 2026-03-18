@@ -10,18 +10,15 @@ License: MIT
 
 from __future__ import annotations
 
-import json
 import os
-import shutil
-from pathlib import Path
-from typing import Any, Optional
+from typing import Any, cast
 
 import yaml
-from tinydb import TinyDB, Query
+from tinydb import Query, TinyDB
 
 from upki_ca.core.common import Common
-from upki_ca.core.upkiError import StorageError
-from upki_ca.storage.abstractStorage import AbstractStorage
+from upki_ca.core.upki_error import StorageError
+from upki_ca.storage.abstract_storage import AbstractStorage
 
 
 class FileStorage(AbstractStorage, Common):
@@ -107,9 +104,9 @@ class FileStorage(AbstractStorage, Common):
             os.makedirs(path, exist_ok=True)
             return True
         except OSError as e:
-            raise StorageError(f"Failed to create directory {path}: {e}")
+            raise StorageError(f"Failed to create directory {path}: {e}") from e
 
-    def _parseYAML(self, filepath: str) -> dict[str, Any]:
+    def _parse_yaml(self, filepath: str) -> dict[str, Any]:
         """
         Parse a YAML file.
 
@@ -120,14 +117,14 @@ class FileStorage(AbstractStorage, Common):
             dict: Parsed YAML data
         """
         try:
-            with open(filepath, "r") as f:
+            with open(filepath) as f:
                 return yaml.safe_load(f) or {}
         except FileNotFoundError:
             return {}
         except Exception as e:
-            raise StorageError(f"Failed to parse YAML {filepath}: {e}")
+            raise StorageError(f"Failed to parse YAML {filepath}: {e}") from e
 
-    def _storeYAML(self, filepath: str, data: dict[str, Any]) -> bool:
+    def _store_yaml(self, filepath: str, data: dict[str, Any]) -> bool:
         """
         Store data to a YAML file.
 
@@ -144,7 +141,7 @@ class FileStorage(AbstractStorage, Common):
                 yaml.safe_dump(data, f, default_flow_style=False)
             return True
         except Exception as e:
-            raise StorageError(f"Failed to store YAML {filepath}: {e}")
+            raise StorageError(f"Failed to store YAML {filepath}: {e}") from e
 
     def initialize(self) -> bool:
         """
@@ -170,7 +167,7 @@ class FileStorage(AbstractStorage, Common):
 
             return True
         except Exception as e:
-            raise StorageError(f"Failed to initialize storage: {e}")
+            raise StorageError(f"Failed to initialize storage: {e}") from e
 
     def connect(self) -> bool:
         """
@@ -212,8 +209,8 @@ class FileStorage(AbstractStorage, Common):
         if self._serials_db is None:
             raise StorageError("Database not initialized")
 
-        Serials = Query()
-        return self._serials_db.contains(Serials.serial == serial)
+        serials = Query()
+        return self._serials_db.contains(serials.serial == serial)
 
     def store_serial(self, serial: int, dn: str) -> bool:
         """Store a serial number."""
@@ -230,9 +227,9 @@ class FileStorage(AbstractStorage, Common):
         if self._serials_db is None:
             raise StorageError("Database not initialized")
 
-        Serials = Query()
-        result = self._serials_db.get(Serials.serial == serial)
-        return result if result else None
+        serials = Query()
+        result = self._serials_db.get(serials.serial == serial)
+        return cast(dict[str, Any] | None, result if result else None)
 
     # Private Key Operations
 
@@ -247,7 +244,7 @@ class FileStorage(AbstractStorage, Common):
             os.chmod(key_path, 0o600)
             return True
         except Exception as e:
-            raise StorageError(f"Failed to store key: {e}")
+            raise StorageError(f"Failed to store key: {e}") from e
 
     def get_key(self, name: str) -> bytes | None:
         """Get a private key."""
@@ -258,7 +255,7 @@ class FileStorage(AbstractStorage, Common):
                     return f.read()
             return None
         except Exception as e:
-            raise StorageError(f"Failed to get key: {e}")
+            raise StorageError(f"Failed to get key: {e}") from e
 
     def delete_key(self, name: str) -> bool:
         """Delete a private key."""
@@ -268,7 +265,7 @@ class FileStorage(AbstractStorage, Common):
                 os.remove(key_path)
             return True
         except Exception as e:
-            raise StorageError(f"Failed to delete key: {e}")
+            raise StorageError(f"Failed to delete key: {e}") from e
 
     # Certificate Operations
 
@@ -282,7 +279,7 @@ class FileStorage(AbstractStorage, Common):
 
             # Update nodes database
             if self._nodes_db:
-                Nodes = Query()
+                nodes = Query()
                 node_data = {
                     "dn": name if "/" in name else f"/CN={name}",
                     "cn": name,
@@ -291,8 +288,8 @@ class FileStorage(AbstractStorage, Common):
                 }
 
                 # Update or insert
-                if self._nodes_db.contains(Nodes.cn == name):
-                    self._nodes_db.update(node_data, Nodes.cn == name)
+                if self._nodes_db.contains(nodes.cn == name):
+                    self._nodes_db.update(node_data, nodes.cn == name)
                 else:
                     self._nodes_db.insert(node_data)
 
@@ -301,7 +298,7 @@ class FileStorage(AbstractStorage, Common):
 
             return True
         except Exception as e:
-            raise StorageError(f"Failed to store certificate: {e}")
+            raise StorageError(f"Failed to store certificate: {e}") from e
 
     def get_cert(self, name: str) -> bytes | None:
         """Get a certificate by name."""
@@ -312,15 +309,15 @@ class FileStorage(AbstractStorage, Common):
                     return f.read()
             return None
         except Exception as e:
-            raise StorageError(f"Failed to get certificate: {e}")
+            raise StorageError(f"Failed to get certificate: {e}") from e
 
     def get_cert_by_serial(self, serial: int) -> bytes | None:
         """Get a certificate by serial number."""
         # Find certificate by serial in nodes database
         if self._nodes_db:
-            Nodes = Query()
-            result = self._nodes_db.get(Nodes.serial == serial)
-            if result:
+            nodes = Query()
+            result = self._nodes_db.get(nodes.serial == serial)
+            if result and isinstance(result, dict):
                 return self.get_cert(result.get("cn", ""))
         return None
 
@@ -333,12 +330,12 @@ class FileStorage(AbstractStorage, Common):
 
             # Update nodes database
             if self._nodes_db:
-                Nodes = Query()
-                self._nodes_db.remove(Nodes.cn == name)
+                nodes = Query()
+                self._nodes_db.remove(nodes.cn == name)
 
             return True
         except Exception as e:
-            raise StorageError(f"Failed to delete certificate: {e}")
+            raise StorageError(f"Failed to delete certificate: {e}") from e
 
     def list_certs(self) -> list[str]:
         """List all certificates."""
@@ -349,7 +346,7 @@ class FileStorage(AbstractStorage, Common):
                     certs.append(filename[:-4])  # Remove .crt extension
             return certs
         except Exception as e:
-            raise StorageError(f"Failed to list certificates: {e}")
+            raise StorageError(f"Failed to list certificates: {e}") from e
 
     # CSR Operations
 
@@ -361,7 +358,7 @@ class FileStorage(AbstractStorage, Common):
                 f.write(csr)
             return True
         except Exception as e:
-            raise StorageError(f"Failed to store CSR: {e}")
+            raise StorageError(f"Failed to store CSR: {e}") from e
 
     def get_csr(self, name: str) -> bytes | None:
         """Get a CSR."""
@@ -372,7 +369,7 @@ class FileStorage(AbstractStorage, Common):
                     return f.read()
             return None
         except Exception as e:
-            raise StorageError(f"Failed to get CSR: {e}")
+            raise StorageError(f"Failed to get CSR: {e}") from e
 
     def delete_csr(self, name: str) -> bool:
         """Delete a CSR."""
@@ -382,7 +379,7 @@ class FileStorage(AbstractStorage, Common):
                 os.remove(csr_path)
             return True
         except Exception as e:
-            raise StorageError(f"Failed to delete CSR: {e}")
+            raise StorageError(f"Failed to delete CSR: {e}") from e
 
     # Node Operations
 
@@ -391,9 +388,9 @@ class FileStorage(AbstractStorage, Common):
         if self._nodes_db is None:
             raise StorageError("Database not initialized")
 
-        Nodes = Query()
+        nodes = Query()
         cn = self._get_cn(dn)
-        return self._nodes_db.contains(Nodes.cn == cn)
+        return self._nodes_db.contains(nodes.cn == cn)
 
     def store_node(self, dn: str, data: dict[str, Any]) -> bool:
         """Store node information."""
@@ -403,9 +400,9 @@ class FileStorage(AbstractStorage, Common):
         cn = self._get_cn(dn)
         node_data = {"dn": dn, "cn": cn, **data}
 
-        Nodes = Query()
-        if self._nodes_db.contains(Nodes.cn == cn):
-            self._nodes_db.update(node_data, Nodes.cn == cn)
+        nodes = Query()
+        if self._nodes_db.contains(nodes.cn == cn):
+            self._nodes_db.update(node_data, nodes.cn == cn)
         else:
             self._nodes_db.insert(node_data)
 
@@ -417,8 +414,8 @@ class FileStorage(AbstractStorage, Common):
             raise StorageError("Database not initialized")
 
         cn = self._get_cn(dn)
-        Nodes = Query()
-        return self._nodes_db.get(Nodes.cn == cn)
+        nodes = Query()
+        return cast(dict[str, Any] | None, self._nodes_db.get(nodes.cn == cn))
 
     def list_nodes(self) -> list[str]:
         """List all nodes."""
@@ -433,10 +430,10 @@ class FileStorage(AbstractStorage, Common):
             raise StorageError("Database not initialized")
 
         cn = self._get_cn(dn)
-        Nodes = Query()
+        nodes = Query()
 
-        if self._nodes_db.contains(Nodes.cn == cn):
-            self._nodes_db.update(data, Nodes.cn == cn)
+        if self._nodes_db.contains(nodes.cn == cn):
+            self._nodes_db.update(data, nodes.cn == cn)
             return True
         return False
 
@@ -451,9 +448,9 @@ class FileStorage(AbstractStorage, Common):
                 if filename.endswith(".yml") or filename.endswith(".yaml"):
                     profile_name = filename.rsplit(".", 1)[0]
                     profile_path = os.path.join(self._profiles_dir, filename)
-                    profiles[profile_name] = self._parseYAML(profile_path)
+                    profiles[profile_name] = self._parse_yaml(profile_path)
         except Exception as e:
-            raise StorageError(f"Failed to list profiles: {e}")
+            raise StorageError(f"Failed to list profiles: {e}") from e
 
         return profiles
 
@@ -461,19 +458,19 @@ class FileStorage(AbstractStorage, Common):
         """Store a profile."""
         try:
             profile_path = os.path.join(self._profiles_dir, f"{name}.yml")
-            return self._storeYAML(profile_path, data)
+            return self._store_yaml(profile_path, data)
         except Exception as e:
-            raise StorageError(f"Failed to store profile: {e}")
+            raise StorageError(f"Failed to store profile: {e}") from e
 
     def get_profile(self, name: str) -> dict[str, Any] | None:
         """Get a profile."""
         try:
             profile_path = os.path.join(self._profiles_dir, f"{name}.yml")
             if os.path.exists(profile_path):
-                return self._parseYAML(profile_path)
+                return self._parse_yaml(profile_path)
             return None
         except Exception as e:
-            raise StorageError(f"Failed to get profile: {e}")
+            raise StorageError(f"Failed to get profile: {e}") from e
 
     def delete_profile(self, name: str) -> bool:
         """Delete a profile."""
@@ -483,7 +480,7 @@ class FileStorage(AbstractStorage, Common):
                 os.remove(profile_path)
             return True
         except Exception as e:
-            raise StorageError(f"Failed to delete profile: {e}")
+            raise StorageError(f"Failed to delete profile: {e}") from e
 
     # Admin Operations
 
@@ -507,8 +504,8 @@ class FileStorage(AbstractStorage, Common):
         if self._admins_db is None:
             raise StorageError("Database not initialized")
 
-        Admins = Query()
-        self._admins_db.remove(Admins.dn == dn)
+        admins = Query()
+        self._admins_db.remove(admins.dn == dn)
         return True
 
     # CRL Operations
@@ -532,7 +529,7 @@ class FileStorage(AbstractStorage, Common):
                 f.write(crl)
             return True
         except Exception as e:
-            raise StorageError(f"Failed to store CRL: {e}")
+            raise StorageError(f"Failed to store CRL: {e}") from e
 
     def get_crl(self, name: str) -> bytes | None:
         """
@@ -551,4 +548,4 @@ class FileStorage(AbstractStorage, Common):
                     return f.read()
             return None
         except Exception as e:
-            raise StorageError(f"Failed to get CRL: {e}")
+            raise StorageError(f"Failed to get CRL: {e}") from e

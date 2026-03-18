@@ -21,9 +21,9 @@ __author__ = "uPKI Team"
 __license__ = "MIT"
 
 from upki_ca.ca.authority import Authority
-from upki_ca.ca.certRequest import CertRequest
-from upki_ca.ca.privateKey import PrivateKey
-from upki_ca.ca.publicCert import PublicCert
+from upki_ca.ca.cert_request import CertRequest
+from upki_ca.ca.private_key import PrivateKey
+from upki_ca.ca.public_cert import PublicCert
 
 __all__ = [
     "Authority",

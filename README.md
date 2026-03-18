@@ -223,23 +223,23 @@ upki/
 ├── 📁 upki_ca/               # Main package
 │   ├── 📁 ca/              # Certificate Authority core
 │   │   ├── authority.py    # CA implementation
-│   │   ├── certRequest.py  # CSR handling
-│   │   ├── privateKey.py   # Private key operations
-│   │   └── publicCert.py   # Certificate handling
+│   │   ├── cert_request.py  # CSR handling
+│   │   ├── private_key.py   # Private key operations
+│   │   └── public_cert.py   # Certificate handling
 │   ├── 📁 connectors/      # ZMQ connectors
 │   │   ├── listener.py     # Base listener
-│   │   ├── zmqListener.py  # CA operations listener
-│   │   └── zmqRegister.py # RA registration
+│   │   ├── zmq_listener.py  # CA operations listener
+│   │   └── zmq_register.py # RA registration
 │   ├── 📁 core/            # Core utilities
 │   │   ├── common.py       # Common utilities
 │   │   ├── options.py      # Configuration options
-│   │   ├── upkiError.py   # Custom exceptions
-│   │   ├── upkiLogger.py  # Logging utilities
+│   │   ├── upki_error.py   # Custom exceptions
+│   │   ├── upki_logger.py  # Logging utilities
 │   │   └── validators.py  # Input validators
 │   ├── 📁 storage/         # Storage backends
-│   │   ├── abstractStorage.py # Storage interface
-│   │   ├── fileStorage.py  # File-based storage
-│   │   └── mongoStorage.py # MongoDB storage
+│   │   ├── abstract_storage.py # Storage interface
+│   │   ├── file_storage.py  # File-based storage
+│   │   └── mongo_storage.py # MongoDB storage
 │   └── 📁 utils/           # Utility modules
 │       ├── config.py       # Configuration management
 │       └── profiles.py     # Certificate profiles

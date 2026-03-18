@@ -15,8 +15,8 @@ from __future__ import annotations
 import re
 from typing import Any
 
-from upki_ca.core.options import KeyLen, SanTypes, RevokeReasons
-from upki_ca.core.upkiError import ValidationError
+from upki_ca.core.options import KeyLen, RevokeReasons
+from upki_ca.core.upki_error import ValidationError
 
 
 class FQDNValidator:
@@ -176,9 +176,8 @@ class SANValidator:
         elif san_type == "EMAIL":
             if not cls.EMAIL_PATTERN.match(value):
                 raise ValidationError(f"Invalid email address: {value}")
-        elif san_type == "URI":
-            if not cls.URI_PATTERN.match(value):
-                raise ValidationError(f"Invalid URI: {value}")
+        elif san_type == "URI" and not cls.URI_PATTERN.match(value):
+            raise ValidationError(f"Invalid URI: {value}")
 
         return True
 

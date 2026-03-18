@@ -10,18 +10,17 @@ License: MIT
 
 from __future__ import annotations
 
+import ipaddress
 from typing import Any
 
-import ipaddress
-
 from cryptography import x509
-from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.backends import default_backend
-from cryptography.x509.oid import NameOID, ExtensionOID, ExtendedKeyUsageOID
+from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.x509.oid import ExtendedKeyUsageOID, ExtensionOID, NameOID
 
-from upki_ca.ca.privateKey import PrivateKey
+from upki_ca.ca.private_key import PrivateKey
 from upki_ca.core.common import Common
-from upki_ca.core.upkiError import CertificateError
+from upki_ca.core.upki_error import CertificateError
 from upki_ca.core.validators import DNValidator, SANValidator
 
 
@@ -121,7 +120,7 @@ class CertRequest(Common):
 
         # Build subject name
         subject_parts = profile.get("subject", {})
-        subject_dict = {k: v for k, v in subject_parts.items()}
+        subject_dict = dict(subject_parts.items())
         subject_dict["CN"] = cn
 
         # Build x509 Name
@@ -258,7 +257,7 @@ class CertRequest(Common):
             csr = builder.sign(pkey.key, hash_algorithm, default_backend())
             return cls(csr)
         except Exception as e:
-            raise CertificateError(f"Failed to generate CSR: {e}")
+            raise CertificateError(f"Failed to generate CSR: {e}") from e
 
     @classmethod
     def load(cls, csr_pem: str) -> CertRequest:
@@ -278,7 +277,7 @@ class CertRequest(Common):
             csr = x509.load_pem_x509_csr(csr_pem.encode("utf-8"), default_backend())
             return cls(csr)
         except Exception as e:
-            raise CertificateError(f"Failed to load CSR: {e}")
+            raise CertificateError(f"Failed to load CSR: {e}") from e
 
     @classmethod
     def load_from_file(cls, filepath: str) -> CertRequest:
@@ -295,13 +294,13 @@ class CertRequest(Common):
             CertificateError: If CSR loading fails
         """
         try:
-            with open(filepath, "r") as f:
+            with open(filepath) as f:
                 csr_pem = f.read()
             return cls.load(csr_pem)
         except FileNotFoundError:
-            raise CertificateError(f"CSR file not found: {filepath}")
+            raise CertificateError(f"CSR file not found: {filepath}") from None
         except Exception as e:
-            raise CertificateError(f"Failed to load CSR from file: {e}")
+            raise CertificateError(f"Failed to load CSR from file: {e}") from e
 
     def export(self, csr: x509.CertificateSigningRequest | None = None) -> str:
         """
@@ -325,7 +324,7 @@ class CertRequest(Common):
         try:
             return csr.public_bytes(serialization.Encoding.PEM).decode("utf-8")
         except Exception as e:
-            raise CertificateError(f"Failed to export CSR: {e}")
+            raise CertificateError(f"Failed to export CSR: {e}") from e
 
     def export_to_file(self, filepath: str) -> bool:
         """
@@ -346,7 +345,7 @@ class CertRequest(Common):
                 f.write(csr_pem)
             return True
         except Exception as e:
-            raise CertificateError(f"Failed to export CSR to file: {e}")
+            raise CertificateError(f"Failed to export CSR to file: {e}") from e
 
     def parse(self) -> dict[str, Any]:
         """
@@ -411,17 +410,14 @@ class CertRequest(Common):
             # This method checks if the CSR can be successfully parsed
             # For full signature verification, we'd need to use the public key
             # to verify the signature on the TBS bytes
-            from cryptography.hazmat.primitives import hashes
-
-            # Get the public key from the CSR
-            public_key = self._csr.public_key()
 
             # The CSR is considered valid if it was successfully loaded
+            return True
             # which means the signature is valid (cryptography validates on load)
             # Additional verification would require the signing key which we don't have
             return True
         except Exception as e:
-            raise CertificateError(f"CSR verification failed: {e}")
+            raise CertificateError(f"CSR verification failed: {e}") from e
 
     def __repr__(self) -> str:
         """Return string representation of the CSR."""

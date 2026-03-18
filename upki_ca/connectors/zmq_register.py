@@ -13,8 +13,8 @@ from __future__ import annotations
 from typing import Any
 
 from upki_ca.connectors.listener import Listener
-from upki_ca.core.upkiError import AuthorityError, CommunicationError
-from upki_ca.core.upkiLogger import UpkiLogger
+from upki_ca.core.upki_error import CommunicationError
+from upki_ca.core.upki_logger import UpkiLogger
 
 
 class ZMQRegister(Listener):

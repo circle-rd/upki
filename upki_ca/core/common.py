@@ -11,8 +11,7 @@ License: MIT
 from __future__ import annotations
 
 import os
-from datetime import datetime, timezone
-from typing import Any
+from datetime import UTC, datetime
 
 
 class Common:
@@ -31,7 +30,7 @@ class Common:
         Returns:
             str: Current UTC timestamp in ISO 8601 format
         """
-        return datetime.now(timezone.utc).isoformat()
+        return datetime.now(UTC).isoformat()
 
     @staticmethod
     def ensure_dir(path: str) -> bool:

@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import logging
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -44,7 +44,7 @@ class UpkiLoggerAdapter(logging.Logger):
             result: Result of the action ("SUCCESS" or "FAILURE")
             **details: Additional audit details
         """
-        timestamp = datetime.now(timezone.utc).isoformat()
+        timestamp = datetime.now(UTC).isoformat()
         details_str = (
             " ".join(f"{k}={v}" for k, v in details.items()) if details else ""
         )
@@ -155,7 +155,6 @@ class UpkiLogger:
         logger = cls.get_logger(logger_name)
 
         # Build structured message
-        timestamp = datetime.now(timezone.utc).isoformat()
         extra_data = " ".join(f"{k}={v}" for k, v in kwargs.items()) if kwargs else ""
         full_message = f"[{event_type}] {message} {extra_data}".strip()
 
@@ -177,7 +176,7 @@ class UpkiLogger:
         """
         logger = cls.get_logger(logger_name)
 
-        timestamp = datetime.now(timezone.utc).isoformat()
+        timestamp = datetime.now(UTC).isoformat()
         details_str = (
             " ".join(f"{k}={v}" for k, v in details.items()) if details else ""
         )
