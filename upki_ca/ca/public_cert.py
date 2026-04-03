@@ -285,9 +285,13 @@ class PublicCert(Common):
             .not_valid_after(end)
         )
 
-        # Add basic constraints for CA certificates
+        # Add basic constraints
         if ca:
-            builder = builder.add_extension(x509.BasicConstraints(ca=True, path_length=None), critical=True)
+            # pathLen=None means unlimited chain depth (suitable for a root CA).
+            # Sub-CAs generated with a profile that specifies pathLen=0 can only
+            # sign leaf certificates, not further CAs.
+            path_len: int | None = profile.get("pathLen", None)
+            builder = builder.add_extension(x509.BasicConstraints(ca=True, path_length=path_len), critical=True)
         else:
             builder = builder.add_extension(x509.BasicConstraints(ca=False, path_length=None), critical=True)
 

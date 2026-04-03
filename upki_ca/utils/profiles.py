@@ -42,6 +42,7 @@ class Profiles(Common):
             "duration": PROFILE_DURATIONS["ca"],
             "digest": DEFAULT_DIGEST,
             "altnames": False,
+            "pathLen": 0,  # Intermediate CAs issued with this profile can only sign leaf certificates
             "subject": {"C": "FR", "O": "uPKI", "OU": "CA", "CN": "uPKI Root CA"},
             "keyUsage": ["keyCertSign", "cRLSign"],
             "extendedKeyUsage": [],
