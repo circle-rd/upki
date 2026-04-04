@@ -13,12 +13,19 @@ Author: uPKI Team
 License: MIT
 """
 
+import ipaddress
 import os
 import shutil
 import subprocess
 import sys
 
 import pytest
+from cryptography.x509 import (
+    DNSName,
+    IPAddress,
+    SubjectAlternativeName,
+    load_pem_x509_certificate,
+)
 
 # Path to the ca_server.py script
 CA_SERVER_PATH = os.path.join(
@@ -817,6 +824,26 @@ subjectKeyIdentifier=hash
         )
         return result.stdout
 
+    def _get_san_dns_names(self, cert_file: str) -> list[str]:
+        """Return the list of DNS SAN values from a PEM certificate."""
+        with open(cert_file, "rb") as fh:
+            cert = load_pem_x509_certificate(fh.read())
+        try:
+            san = cert.extensions.get_extension_for_class(SubjectAlternativeName)
+            return [n.value for n in san.value if isinstance(n, DNSName)]
+        except Exception:
+            return []
+
+    def _get_san_ip_addresses(self, cert_file: str) -> list[str]:
+        """Return the list of IP SAN values (as strings) from a PEM certificate."""
+        with open(cert_file, "rb") as fh:
+            cert = load_pem_x509_certificate(fh.read())
+        try:
+            san = cert.extensions.get_extension_for_class(SubjectAlternativeName)
+            return [str(n.value) for n in san.value if isinstance(n, IPAddress)]
+        except Exception:
+            return []
+
     def _has_extension(self, cert_file: str, extension_name: str) -> bool:
         """Check if certificate has a specific extension."""
         extensions = self._get_cert_extensions(cert_file)
@@ -1011,17 +1038,13 @@ subjectKeyIdentifier=hash
 
     def test_san_dns(self):
         """Test SAN DNS names are present."""
-        extensions = self._get_cert_extensions(self.server_cert)
-
-        assert (
-            "test.example.com" in extensions
-        ), "Server certificate should have DNS SAN"
+        dns_names = self._get_san_dns_names(self.server_cert)
+        assert "test.example.com" in dns_names, "Server certificate should have DNS SAN"
 
     def test_san_ip(self):
         """Test SAN IP addresses are present."""
-        extensions = self._get_cert_extensions(self.server_cert)
-
-        assert "192.168.1.1" in extensions, "Server certificate should have IP SAN"
+        ip_addresses = self._get_san_ip_addresses(self.server_cert)
+        assert "192.168.1.1" in ip_addresses, "Server certificate should have IP SAN"
 
     def test_profiles_without_san(self):
         """Test profiles without SAN don't have subjectAltName extension."""
