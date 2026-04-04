@@ -13,7 +13,6 @@ Author: uPKI Team
 License: MIT
 """
 
-import ipaddress
 import os
 import shutil
 import subprocess
@@ -1039,12 +1038,16 @@ subjectKeyIdentifier=hash
     def test_san_dns(self):
         """Test SAN DNS names are present."""
         dns_names = self._get_san_dns_names(self.server_cert)
-        assert "test.example.com" in dns_names, "Server certificate should have DNS SAN"
+        assert any(
+            name == "test.example.com" for name in dns_names
+        ), "Server certificate should have DNS SAN"
 
     def test_san_ip(self):
         """Test SAN IP addresses are present."""
         ip_addresses = self._get_san_ip_addresses(self.server_cert)
-        assert "192.168.1.1" in ip_addresses, "Server certificate should have IP SAN"
+        assert any(
+            addr == "192.168.1.1" for addr in ip_addresses
+        ), "Server certificate should have IP SAN"
 
     def test_profiles_without_san(self):
         """Test profiles without SAN don't have subjectAltName extension."""
