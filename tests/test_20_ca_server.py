@@ -9,10 +9,11 @@ Author: uPKI Team
 License: MIT
 """
 
+import contextlib
 import os
 import shutil
 import tempfile
-from unittest.mock import MagicMock, call, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -61,10 +62,8 @@ class TestCAServerStart:
             mock_auth_cls.get_instance.return_value = mock_authority
             mock_time.sleep.side_effect = SystemExit(0)
 
-            try:
+            with contextlib.suppress(SystemExit):
                 self.server.start(env_seed=env_seed, env_host=env_host)
-            except SystemExit:
-                pass
 
             return {
                 "storage": mock_storage,
@@ -132,10 +131,8 @@ class TestCAServerStart:
             patch("ca_server.time"),
         ):
             mock_auth_cls.get_instance.return_value = mock_authority
-            try:
+            with contextlib.suppress(SystemExit):
                 self.server.start(env_seed="seed", env_host=custom_host)
-            except SystemExit:
-                pass
 
             # ZMQRegister must be created with custom_host
             reg_call_kwargs = mock_reg_cls.call_args
@@ -172,10 +169,8 @@ class TestCAServerStart:
             patch("ca_server.time"),
         ):
             mock_auth_cls.get_instance.return_value = mock_authority
-            try:
+            with contextlib.suppress(SystemExit):
                 self.server.start(env_seed="seed")
-            except SystemExit:
-                pass
 
         # Assert
         mock_register.start.assert_called_once()
