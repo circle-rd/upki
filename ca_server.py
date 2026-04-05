@@ -255,28 +255,28 @@ class CAServer(Common):
         env_seed: str | None = None,
         env_host: str = "0.0.0.0",
     ) -> bool:
-        """
-        Auto-bootstrap the CA and run both listeners concurrently.
+        """Auto-bootstrap the CA and run both listeners concurrently.
 
-        On **first boot** (no config file yet):
-          1. Injects *env_seed* into the config so it is used as the
-             registration seed instead of generating a random one.
-          2. Runs ``init_pki()`` to create the CA key/certificate.
+        On first boot (no config file yet), injects env_seed into the config
+        so it is used as the registration seed instead of generating a random
+        one, then calls init_pki() to create the CA key and certificate.
 
-        On **subsequent boots** (config + CA key/cert already exist on the
-        data volume):
-          - ``init_pki()`` is idempotent and skips key/cert generation.
+        On subsequent boots (config and CA key/cert already exist on the data
+        volume), init_pki() is idempotent and skips key/cert generation.
 
-        Regardless of boot type, both the **registration listener**
-        (port + 1) and the **CA listener** (port) are started and the
-        process is kept alive.
+        Regardless of boot type, both the registration listener (port + 1)
+        and the CA listener (port) are started and the process is kept alive.
 
         Args:
-            env_seed: Registration seed from the ``UPKI_CA_SEED`` env var.
-            env_host: Bind address (default ``0.0.0.0`` for Docker).
+            env_seed: Registration seed from the UPKI_CA_SEED environment
+                variable. Ignored when the config already contains a seed.
+            env_host: Bind address for both ZMQ sockets. Defaults to
+                ``0.0.0.0`` so Docker containers can accept connections
+                from other containers.
 
         Returns:
-            bool: This method never returns normally; it loops indefinitely.
+            bool: Always False on error; does not return normally on success
+                (blocks in an infinite sleep loop).
         """
         try:
             # Pre-load config; inject env seed before any init so that
@@ -299,7 +299,7 @@ class CAServer(Common):
             # init_pki() leaves self._authority initialised with its storage.
             storage = self._authority.storage
 
-            # ── Registration listener (port + 1) ─────────────────────────────
+            # -- Registration listener (port + 1) ----------------------------
             self._register_listener = ZMQRegister(
                 host=host,
                 port=port + 1,
@@ -311,7 +311,7 @@ class CAServer(Common):
             self._register_listener.start()
             self._logger.info(f"Registration listener started on {host}:{port + 1}")
 
-            # ── CA listener (port) ─────────────────────────────────────────────
+            # -- CA listener (port) -------------------------------------------
             self._listener = ZMQListener(host=host, port=port, storage=storage)
             self._listener.initialize()
             self._listener.initialize_authority()
