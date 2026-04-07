@@ -2,6 +2,7 @@
     "name": "upki-ca-docs",
     "version": "1.0.0",
     "private": true,
+    "description": "Self-hosted Certificate Authority — private PKI with zero internet dependency.",
     "scripts": {
         "dev": "nuxt dev",
         "build": "nuxt build",
