@@ -1,0 +1,17 @@
+{
+"servers": {
+"Docus Server": {
+"url": "https://docus.dev/mcp",
+"type": "http"
+},
+"uPKI CA Docs (local dev)": {
+"url": "http://localhost:3000/mcp",
+"type": "http"
+},
+"uPKI CA Docs": {
+"url": "https://docs.circle-cyber.com/upki-ca/mcp",
+"type": "http"
+}
+},
+"inputs": []
+}
