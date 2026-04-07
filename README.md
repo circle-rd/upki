@@ -3,40 +3,75 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python Version](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/)
 [![Code Style: Ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
-[![Python Version](https://img.shields.io/pypi/pyversions/upki-ca)](https://pypi.org/project/upki-ca/)
-[![Docker Image](https://img.shields.io/docker/v/upki-ca/ca-server?label=docker)](https://hub.docker.com/r/upki-ca/ca-server)
+[![PyPI](https://img.shields.io/pypi/v/upki-ca.svg)](https://pypi.org/project/upki-ca/)
 
-A production-ready Public Key Infrastructure (PKI) and Certificate Authority system with native ZeroMQ protocol support for secure, high-performance certificate operations.
+Certificate Authority (CA) Server for the uPKI Public Key Infrastructure system. Manages the full certificate lifecycle and exposes PKI operations to Registration Authorities over a ZeroMQ protocol.
 
 ## Overview
 
-uPKI CA Server is a modern PKI implementation designed for scalable certificate lifecycle management. It provides a complete Certificate Authority solution with support for certificate generation, signing, revocation, CRL management, OCSP responses, certificate profiles, and administrative management.
+The uPKI CA Server is the trust anchor of the uPKI ecosystem. It runs as a persistent background process listening on two dedicated ZMQ ports:
 
-Built on ZeroMQ (ZMQ) for reliable, asynchronous communication, uPKI offers two dedicated ports:
+- **Port 5000** — CA operations: certificate signing, renewal, revocation, CRL generation, OCSP checks
+- **Port 5001** — RA registration: initial handshake to onboard a new Registration Authority
 
-- **Port 5000**: CA operations (certificate signing, revocation, CRL generation, OCSP)
-- **Port 5001**: RA (Registration Authority) registration endpoint
+It is designed to operate standalone or in a containerised stack together with [uPKI RA Server](https://github.com/circle-rd/upki-ra) and [uPKI CLI](https://github.com/circle-rd/upki-cli).
+
+## Architecture
+
+```mermaid
+graph TB
+    subgraph "Clients"
+        CLI[uPKI CLI]
+        ACME[ACME Clients<br/>cert-manager, Traefik]
+    end
+
+    subgraph "uPKI RA Server"
+        RA[Registration Authority<br/>Port 8000]
+    end
+
+    subgraph "uPKI CA Server"
+        direction TB
+        CA_OPS[CA Listener<br/>Port 5000]
+        RA_REG[Register Listener<br/>Port 5001]
+
+        subgraph "Core"
+            Auth[Authority]
+            Profiles[Profiles]
+        end
+
+        subgraph "Storage"
+            FileDB[(TinyDB +<br/>Filesystem)]
+        end
+    end
+
+    CLI -->|HTTPS + mTLS| RA
+    ACME -->|HTTPS| RA
+
+    RA -->|ZMQ REQ/REP| CA_OPS
+    RA -->|ZMQ REQ/REP| RA_REG
+
+    CA_OPS --> Auth
+    RA_REG --> Auth
+    Auth --> Profiles
+    Auth --> FileDB
+```
 
 ## Key Features
 
-- **Certificate Authority Operations** — Generate Root CA and Intermediate CA certificates with full PKI hierarchy support
-- **Certificate Signing** — Process Certificate Signing Requests (CSRs) with configurable key types and algorithms
-- **Revocation Management** — Revoke certificates and generate Certificate Revocation Lists (CRL)
-- **OCSP Support** — Built-in Online Certificate Status Protocol responder for real-time certificate validation
-- **Certificate Profiles** — Define and enforce certificate templates with custom extensions, key usage, and validity periods
-- **Administrative Management** — Manage CA administrators with role-based access control
-- **ZMQ Protocol** — Native ZeroMQ messaging for reliable, asynchronous CA operations
-- **Multiple Storage Backends** — File-based storage (default) and MongoDB support
-- **Docker Deployment** — Production-ready Docker image for easy containerized deployment
+- **Certificate Lifecycle** — Sign, renew, revoke, and delete certificates via ZMQ commands
+- **CRL Management** — Generate and serve Certificate Revocation Lists on demand
+- **OCSP Checks** — Real-time certificate status verification
+- **Certificate Profiles** — Built-in and custom profiles with configurable key type, validity, extensions, and SANs
+- **RA Registration** — Seed-based handshake to securely onboard Registration Authorities
+- **Import Existing CA** — Bootstrap from an existing key/certificate pair (`--ca-key` / `--ca-cert`)
+- **Docker Auto-bootstrap** — Single `start` command initialises the PKI on first boot then runs both listeners
+- **Multiple Storage Backends** — File-based storage (default, powered by TinyDB) with a MongoDB interface stub
 
 ## Requirements
 
-- **Python**: 3.11 or higher
-- **Dependencies**:
-  - `cryptography` — cryptographic operations
-  - `pyyaml` — configuration management
-  - `tinydb` — embedded document database
-  - `zmq` — ZeroMQ messaging
+- Python 3.11+
+- Poetry (package manager)
+- cryptography library
 
 ## Installation
 
@@ -49,120 +84,115 @@ pip install upki-ca
 ### From Source
 
 ```bash
-# Clone the repository
-git clone https://github.com/circle-rd/upki.git
-cd upki
-
-# Install dependencies
-pip install -e .
+git clone https://github.com/circle-rd/upki-ca.git
+cd upki-ca
+poetry install
 ```
 
 ### Development Installation
 
 ```bash
-# Install with development dependencies
-pip install -e ".[dev]"
-
-# Run the test suite
-pytest
-
-# Run with coverage report
-pytest --cov=upki_ca --cov-report=html
+poetry install --with dev,lint
 ```
 
-## Quick Start
+## CLI Usage
 
-### 1. Initialize the PKI
+The main entry point is `ca_server.py`. All commands accept `--path <dir>` to override the default storage location (`~/.upki/ca`).
+
+### Initialize the PKI
+
+Creates the CA key and certificate on first run. Idempotent on subsequent runs.
 
 ```bash
-python ca_server.py init
+# Generate a fresh CA
+poetry run python ca_server.py init
+
+# Import an existing CA key and certificate
+poetry run python ca_server.py init --ca-key ca.key --ca-cert ca.crt
+
+# Import a password-protected key
+poetry run python ca_server.py init --ca-key ca.key --ca-cert ca.crt --ca-password-file /run/secrets/ca_pass
 ```
 
-This creates the Root CA with default configuration. You can customize the CA by editing the configuration file.
+A registration seed is printed on first `init`. Keep it secure — the RA operator will need it.
 
-### 2. Register a Registration Authority (RA)
+### Register a Registration Authority
+
+Starts the registration listener (port 5001, clear mode) and waits for the RA to complete the handshake.
 
 ```bash
-# Register an RA in clear mode (for initial setup)
-python ca_server.py register
+poetry run python ca_server.py register
 ```
 
-### 3. Start the CA Server
+### Start the CA Server
+
+Starts the CA listener (port 5000, TLS mode). The RA must already be registered.
 
 ```bash
-# Start the CA server in TLS mode
-python ca_server.py listen
+# Default: tcp://127.0.0.1:5000
+poetry run python ca_server.py listen
+
+# Custom bind address
+poetry run python ca_server.py listen --host 0.0.0.0 --port 5000
 ```
 
-The server will start listening on:
+### Auto-bootstrap (Docker / Production)
 
-- `tcp://*:5000` — CA operations
-- `tcp://*:5001` — RA registration
+Initialises the PKI on the first boot (or skips it if already done), then runs both listeners concurrently. This is the default Docker entrypoint.
+
+```bash
+poetry run python ca_server.py start
+```
 
 ## Configuration
 
-The CA server uses a YAML configuration file. On first run, it creates a default configuration. Key configuration options include:
+On first run, `ca_server.py init` creates `ca.config.yml` in the storage directory with the following defaults:
 
 ```yaml
-ca:
-  name: "uPKI Root CA"
-  validity_days: 3650
-  key_type: "RSA"
-  key_size: 4096
-  hash_algorithm: "sha256"
-
-server:
-  host: "0.0.0.0"
-  ca_port: 5000
-  ra_port: 5001
-
-storage:
-  type: "file"
-  path: "./data"
+company: "Company Name"
+domain: "example.com"
+host: "127.0.0.1"
+port: 5000          # CA listener; registration listener uses port + 1
+clients: "register" # all | register | manual
+password: null      # CA private key password (null = no encryption)
+seed: null          # RA registration seed (auto-generated if absent)
+key_type: "rsa"     # rsa | dsa
+key_length: 4096
+digest: "sha256"    # md5 | sha1 | sha256 | sha512
+crl_validity: 7     # CRL validity in days
 ```
 
-## Usage Examples
+### Environment Variables
 
-### Initialize a New CA
+When running via Docker or systemd, configuration can be injected without editing the config file:
 
-```bash
-python ca_server.py init --config custom_config.yaml
-```
+| Variable            | Description                                          |
+| ------------------- | ---------------------------------------------------- |
+| `UPKI_DATA_DIR`     | Override the storage path (`--path` equivalent)      |
+| `UPKI_CA_SEED`      | Registration seed (used by `start` on first boot)    |
+| `UPKI_CA_HOST`      | Bind address for both ZMQ sockets (default `0.0.0.0`) |
+| `UPKI_CA_KEY_FILE`  | Path to an existing CA private key to import         |
+| `UPKI_CA_CERT_FILE` | Path to an existing CA certificate to import         |
 
-### Start the Server
+## Certificate Profiles
 
-```bash
-# Start with default settings
-python ca_server.py listen
+Profiles are stored as YAML files under `~/.upki/ca/profiles/`. The following built-in profiles are created automatically at initialisation:
 
-# Start on specific host
-python ca_server.py listen --host 127.0.0.1
-```
+| Profile  | Type     | Default Validity | Key Usage                                    |
+| -------- | -------- | ---------------- | -------------------------------------------- |
+| `ca`     | `sslCA`  | 10 years         | `keyCertSign`, `cRLSign`                     |
+| `ra`     | `sslCA`  | 1 year           | `digitalSignature`, `keyEncipherment`        |
+| `server` | `server` | 60 days          | `serverAuth`                                 |
+| `webapp` | `server` | 60 days          | `serverAuth`, `clientAuth`                   |
+| `laptop` | `user`   | 30 days          | `clientAuth`, `emailProtection`              |
+| `user`   | `user`   | 30 days          | `clientAuth`                                 |
+| `admin`  | `user`   | 1 year           | `clientAuth`                                 |
 
-### ZMQ Client Operations
+Custom profiles can be added by dropping a YAML file in the `profiles/` directory.
 
-Connect to the CA server using ZMQ to perform operations:
+## Docker Deployment
 
-```python
-import zmq
-
-# CA operations port (5000)
-context = zmq.Context()
-ca_socket = context.socket(zmq.REQ)
-ca_socket.connect("tcp://localhost:5000")
-
-# RA registration port (5001)
-ra_socket = context.socket(zmq.REQ)
-ra_socket.connect("tcp://localhost:5001")
-```
-
-For detailed protocol specifications, see [`docs/CA_ZMQ_PROTOCOL.md`](docs/CA_ZMQ_PROTOCOL.md).
-
-## Deployment
-
-### Docker Deployment
-
-#### Using Docker Run
+### Using Docker Run
 
 ```bash
 docker run -d \
@@ -170,95 +200,117 @@ docker run -d \
   -p 5000:5000 \
   -p 5001:5001 \
   -v upki_data:/data \
-  upki-ca/ca-server:latest
+  -e UPKI_DATA_DIR=/data \
+  -e UPKI_CA_SEED=<your-seed> \
+  ghcr.io/circle-rd/upki-ca:latest
 ```
 
-#### Using Docker Compose
+### Using Docker Compose
 
 ```yaml
-version: "3.8"
-
 services:
   upki-ca:
-    image: upki-ca/ca-server:latest
+    image: ghcr.io/circle-rd/upki-ca:latest
     ports:
       - "5000:5000"
       - "5001:5001"
     volumes:
       - upki_data:/data
+    environment:
+      UPKI_DATA_DIR: /data
+      UPKI_CA_SEED: ${CA_SEED}
     restart: unless-stopped
+
+volumes:
+  upki_data:
 ```
 
-#### Build from Source
+### Build from Source
 
 ```bash
-docker build -t upki-ca/ca-server:latest .
+docker build -t upki-ca:latest .
 ```
-
-### Direct Deployment
-
-```bash
-# Install and run as a service
-pip install upki-ca
-python ca_server.py init
-python ca_server.py listen
-```
-
-For production deployments, consider:
-
-- Running behind a reverse proxy (nginx, Traefik)
-- Enabling TLS for all connections
-- Using a proper certificate for the CA
-- Setting up monitoring and logging
 
 ## Project Organization
 
 ```
-upki/
-├── 📁 .github/              # GitHub workflows and actions
-│   └── workflows/           # CI/CD pipelines
-├── 📁 docs/                 # Documentation
+upki-ca/
+├── ca_server.py              # Main entry point (CLI)
+├── pyproject.toml            # Poetry configuration
+├── Dockerfile                # Docker image definition
+├── docs/
 │   ├── CA_ZMQ_PROTOCOL.md   # ZMQ protocol specification
 │   └── SPECIFICATIONS_CA.md # CA specifications
-├── 📁 tests/                # Test suite
-│   └── test_*.py           # Unit and functional tests
-├── 📁 upki_ca/               # Main package
-│   ├── 📁 ca/              # Certificate Authority core
-│   │   ├── authority.py    # CA implementation
-│   │   ├── cert_request.py  # CSR handling
-│   │   ├── private_key.py   # Private key operations
-│   │   └── public_cert.py   # Certificate handling
-│   ├── 📁 connectors/      # ZMQ connectors
-│   │   ├── listener.py     # Base listener
-│   │   ├── zmq_listener.py  # CA operations listener
-│   │   └── zmq_register.py # RA registration
-│   ├── 📁 core/            # Core utilities
-│   │   ├── common.py       # Common utilities
-│   │   ├── options.py      # Configuration options
-│   │   ├── upki_error.py   # Custom exceptions
-│   │   ├── upki_logger.py  # Logging utilities
-│   │   └── validators.py  # Input validators
-│   ├── 📁 storage/         # Storage backends
+├── upki_ca/
+│   ├── ca/
+│   │   ├── authority.py      # Core CA singleton (sign, revoke, renew…)
+│   │   ├── cert_request.py   # CSR parsing and validation
+│   │   ├── private_key.py    # Private key generation / import
+│   │   └── public_cert.py    # Certificate building and serialisation
+│   ├── connectors/
+│   │   ├── listener.py       # Base ZMQ REP socket
+│   │   ├── zmq_listener.py   # CA operations dispatcher (port 5000)
+│   │   └── zmq_register.py   # RA registration handler (port 5001)
+│   ├── core/
+│   │   ├── common.py         # Base class with shared utilities
+│   │   ├── options.py        # Allowed values, profiles, durations
+│   │   ├── upki_error.py     # Custom exception hierarchy
+│   │   ├── upki_logger.py    # Logging setup
+│   │   └── validators.py     # Input validation (DN fields, SANs…)
+│   ├── storage/
 │   │   ├── abstract_storage.py # Storage interface
-│   │   ├── file_storage.py  # File-based storage
-│   │   └── mongo_storage.py # MongoDB storage
-│   └── 📁 utils/           # Utility modules
-│       ├── config.py       # Configuration management
-│       └── profiles.py     # Certificate profiles
-├── 📄 pyproject.toml       # Project configuration
-├── 📄 Dockerfile           # Docker image definition
-└── 📄 ca_server.py          # Main entry point
+│   │   ├── file_storage.py     # TinyDB + filesystem (default)
+│   │   └── mongo_storage.py    # MongoDB stub (not yet implemented)
+│   └── utils/
+│       ├── config.py           # YAML config loader / writer
+│       └── profiles.py         # Profile management
+└── tests/
+    ├── test_00_common.py
+    ├── test_10_config.py
+    ├── test_10_validators.py
+    ├── test_20_ca_server.py
+    ├── test_20_profiles.py
+    └── test_100_pki_functional.py
 ```
 
-## Documentation
+## CA ZMQ Operations
 
-- [ZMQ Protocol Specification](docs/CA_ZMQ_PROTOCOL.md) — Detailed protocol documentation
-- [CA Specifications](docs/SPECIFICATIONS_CA.md) — Technical specifications
+The CA exposes the following commands on port 5000. See [docs/CA_ZMQ_PROTOCOL.md](docs/CA_ZMQ_PROTOCOL.md) for the full message format.
+
+| Command        | Description                             |
+| -------------- | --------------------------------------- |
+| `get_ca`       | Retrieve the CA certificate             |
+| `get_crl`      | Retrieve the current CRL                |
+| `generate_crl` | Force CRL regeneration                  |
+| `generate`     | Generate a key pair and sign a cert     |
+| `sign`         | Sign an external CSR                    |
+| `renew`        | Renew an existing certificate           |
+| `revoke`       | Revoke a certificate                    |
+| `unrevoke`     | Remove a certificate from the CRL       |
+| `delete`       | Delete a certificate record             |
+| `view`         | Retrieve certificate details            |
+| `ocsp_check`   | Check the revocation status of a cert   |
+
+## Development
+
+### Running Tests
+
+```bash
+poetry run pytest tests/
+```
+
+### Code Style
+
+```bash
+poetry run ruff check .
+poetry run ruff format .
+```
+
+## Related Projects
+
+- [uPKI RA Server](https://github.com/circle-rd/upki-ra) — Registration Authority, bridges clients to this CA
+- [uPKI CLI](https://github.com/circle-rd/upki-cli) — Client application for certificate enrolment and renewal
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
-## Contributing
-
-Contributions are welcome! Please read our [contributing guidelines](CONTRIBUTING.md) before submitting pull requests.
+MIT License

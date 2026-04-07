@@ -1,7 +1,7 @@
 [project]
 name = "upki-ca"
-version = "0.1.0"
-description = "uPKI CA instance"
+version = "0.1.5"
+description = "uPKI Certificate Authority server"
 authors = [
     {name = "x42en",email = "x42en@users.noreply.github.com"}
 ]
