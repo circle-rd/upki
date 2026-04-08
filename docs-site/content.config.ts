@@ -1,14 +1,25 @@
 import { defineContentConfig, defineCollection } from "@nuxt/content";
+import { join } from "node:path";
+
+const cwd = join(process.cwd(), "content");
 
 export default defineContentConfig({
   collections: {
     landing: defineCollection({
       type: "page",
-      source: "index.md",
+      source: {
+        cwd,
+        include: "index.md",
+      },
     }),
     docs: defineCollection({
       type: "page",
-      source: "docs/**/*.md",
+      source: {
+        cwd,
+        include: "docs/**",
+        prefix: "/docs",
+        exclude: ["index.md"],
+      },
     }),
   },
 });
