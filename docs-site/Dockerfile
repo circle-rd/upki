@@ -25,9 +25,17 @@ WORKDIR /app
 
 COPY --from=builder /app/.output ./.output
 
+# Re-declare build args so the runtime Nitro server inherits the correct
+# base URL and site URL. Without these declarations the ARG values from
+# Stage 1 are not propagated to the final image.
+ARG NUXT_APP_BASE_URL=/upki-ca/
+ARG NUXT_SITE_URL=https://docs.circle-cyber.com/upki-ca
+
 ENV HOST=0.0.0.0
 ENV PORT=3000
 ENV NODE_ENV=production
+ENV NUXT_APP_BASE_URL=${NUXT_APP_BASE_URL}
+ENV NUXT_SITE_URL=${NUXT_SITE_URL}
 
 EXPOSE 3000
 
